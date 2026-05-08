@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CalTrack • Daily Calorie Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
+        .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .meal-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
+        .calendar-day { transition: all 0.2s; }
+        .calendar-day:hover { background-color: #ecfdf5; }
+        .calendar-day.today { background-color: #a7f3d0; font-weight: 600; }
+        .calendar-day.selected { background-color: #10b981; color: white; font-weight: 600; }
+        .total-net { animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
+    </style>
+</head>
+<body class="min-h-screen pb-12">
+
+    <!-- Login Screen -->
+    <div id="login-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
+        <div class="max-w-md w-full mx-4 bg-white rounded-3xl shadow-xl p-8">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 mx-auto bg-emerald-600 rounded-3xl flex items-center justify-center text-white text-4xl mb-4">🍎</div>
+                <h1 class="text-4xl font-bold">CalTrack</h1>
+                <p class="text-slate-500">Your personal calorie journal</p>
+            </div>
+
+            <div class="flex border-b mb-6">
+                <button onclick="showLoginForm()" id="tab-login" class="flex-1 py-3 font-medium border-b-2 border-emerald-600 text-emerald-600">Login</button>
+                <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-3 font-medium text-slate-400">Sign Up</button>
+            </div>
+
+            <div id="login-form">
+                <input id="login-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="login-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <button onclick="login()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
+            </div>
+
+            <div id="signup-form" class="hidden">
+                <input id="signup-username" type="text" placeholder="Choose username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="signup-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <button onclick="signup()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Create Account</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="main-app" class="hidden max-w-6xl mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-8">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-3xl">🍎</div>
+                <div>
+                    <h1 class="text-4xl font-bold">CalTrack</h1>
+                    <p>Welcome, <span id="current-user-display" class="font-medium"></span></p>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button onclick="logout()" class="px-5 py-2 bg-white border rounded-2xl hover:bg-slate-50">Logout</button>
+                <button onclick="goToToday()" class="px-5 py-2 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700">Today</button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Calendar -->
+            <div class="lg:col-span-3 bg-white rounded-3xl shadow-sm p-6">
+                <div class="flex justify-between mb-4">
+                    <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="calendar-title" class="font-semibold text-xl"></h3>
+                    <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="grid grid-cols-7 text-center text-xs text-slate-500 mb-2">
+                    <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
+            </div>
+
+            <!-- Main Tracking Area -->
+            <div class="lg:col-span-9">
+                <h2 id="selected-date-display" class="text-3xl font-semibold mb-1"></h2>
+                <p id="day-name" class="text-slate-500 mb-6"></p>
+
+                <!-- Goal -->
+                <div class="bg-white rounded-3xl p-6 mb-8">
+                    <div class="flex justify-between mb-3">
+                        <span class="font-medium">Daily Goal</span>
+                        <input id="goal-input" type="number" value="2000" oninput="updateGoal()" 
+                               class="w-24 text-right font-mono text-xl focus:outline-none">
+                    </div>
+                    <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm mt-2">
+                        <span id="calories-consumed">0 kcal</span>
+                        <span id="remaining-calories">2000 remaining</span>
+                    </div>
+                </div>
+
+                <!-- Meals -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="meal-card bg-white rounded-3xl shadow-sm">
+                        <div class="bg-amber-50 px-6 py-4 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">☀️</span>
+                                <div><strong>Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div>
+                            </div>
+                            <button onclick="showAddModal('breakfast')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="breakfast-list" class="p-6 space-y-3"></div>
+                    </div>
+
+                    <div class="meal-card bg-white rounded-3xl shadow-sm">
+                        <div class="bg-blue-50 px-6 py-4 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">🍲</span>
+                                <div><strong>Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div>
+                            </div>
+                            <button onclick="showAddModal('lunch')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="lunch-list" class="p-6 space-y-3"></div>
+                    </div>
+
+                    <div class="meal-card bg-white rounded-3xl shadow-sm">
+                        <div class="bg-indigo-50 px-6 py-4 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">🌙</span>
+                                <div><strong>Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div>
+                            </div>
+                            <button onclick="showAddModal('dinner')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="dinner-list" class="p-6 space-y-3"></div>
+                    </div>
+
+                    <div class="meal-card bg-white rounded-3xl shadow-sm">
+                        <div class="bg-pink-50 px-6 py-4 flex justify-between items-center">
+                            <div class="flex items-center gap-3">
+                                <span class="text-3xl">🍪</span>
+                                <div><strong>Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div>
+                            </div>
+                            <button onclick="showAddModal('snacks')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="snacks-list" class="p-6 space-y-3"></div>
+                    </div>
+                </div>
+
+                <!-- Exercise -->
+                <div class="bg-white rounded-3xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <strong class="text-lg">Exercise</strong>
+                        <button onclick="showExerciseModal()" class="px-5 py-2 bg-orange-100 text-orange-700 rounded-2xl text-sm font-medium">+ Add Exercise</button>
+                    </div>
+                    <div id="exercise-list" class="space-y-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Food Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6">
+            <h3 class="text-xl font-semibold mb-4">Add Food</h3>
+            <select id="meal-type" class="w-full mb-4 p-3 border rounded-2xl">
+                <option value="breakfast">Breakfast</option>
+                <option value="lunch">Lunch</option>
+                <option value="dinner">Dinner</option>
+                <option value="snacks">Snacks</option>
+            </select>
+            <input id="food-name" type="text" placeholder="Food name" class="w-full mb-4 p-4 border rounded-2xl">
+            <input id="food-calories" type="number" placeholder="Calories" class="w-full mb-6 p-4 border rounded-2xl">
+            <div class="flex gap-3">
+                <button onclick="hideModal()" class="flex-1 py-4 border rounded-2xl">Cancel</button>
+                <button onclick="addFood()" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div id="exercise-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+        <div class="bg-white rounded-3xl w-full max-w-md p-6">
+            <h3 class="text-xl font-semibold mb-4">Log Exercise</h3>
+            <input id="exercise-name" type="text" placeholder="Activity (e.g. Running)" class="w-full mb-4 p-4 border rounded-2xl">
+            <div class="grid grid-cols-2 gap-4">
+                <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border rounded-2xl">
+                <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border rounded-2xl">
+            </div>
+            <div class="flex gap-3 mt-6">
+                <button onclick="hideExerciseModal()" class="flex-1 py-4 border rounded-2xl">Cancel</button>
+                <button onclick="addExercise()" class="flex-1 py-4 bg-orange-600 text-white rounded-2xl">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+        let users = {};
+        let currentDate = new Date().toISOString().split('T')[0];
+        let currentMonth = new Date().getMonth();
+        let currentYear = new Date().getFullYear();
+
+        let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
+
+        function loadUsers() { const s = localStorage.getItem('caltrack_users'); if(s) users = JSON.parse(s); }
+        function saveUsers() { localStorage.setItem('caltrack_users', JSON.stringify(users)); }
+
+        function getDateData(date) {
+            if (!users[currentUser]) users[currentUser] = { history: {} };
+            if (!users[currentUser].history[date]) {
+                users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
+            }
+            return users[currentUser].history[date];
+        }
+
+        function loadCurrentData() {
+            data = getDateData(currentDate);
+            document.getElementById('goal-input').value = data.goal || 2000;
+        }
+
+        function saveCurrentData() {
+            if (currentUser) {
+                users[currentUser].history[currentDate] = data;
+                saveUsers();
+            }
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            grid.innerHTML = '';
+            document.getElementById('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date().toISOString().split('T')[0];
+
+            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+                const isToday = dateStr === today;
+                const isSelected = dateStr === currentDate;
+
+                const div = document.createElement('div');
+                div.className = `calendar-day py-3 rounded-2xl cursor-pointer text-sm ${isToday ? 'today' : ''} ${isSelected ? 'selected' : ''}`;
+                div.textContent = day;
+                div.onclick = () => {
+                    currentDate = dateStr;
+                    loadCurrentData();
+                    renderAll();
+                    renderCalendar();
+                };
+                grid.appendChild(div);
+            }
+        }
+
+        function prevMonth() { currentMonth--; if(currentMonth < 0){currentMonth=11; currentYear--;} renderCalendar(); }
+        function nextMonth() { currentMonth++; if(currentMonth > 11){currentMonth=0; currentYear++;} renderCalendar(); }
+        function goToToday() {
+            const now = new Date();
+            currentDate = now.toISOString().split('T')[0];
+            currentMonth = now.getMonth();
+            currentYear = now.getFullYear();
+            loadCurrentData();
+            renderAll();
+            renderCalendar();
+        }
+
+        function updateDateDisplay() {
+            const d = new Date(currentDate);
+            document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+            document.getElementById('day-name').textContent = '';
+        }
+
+        function renderMeal(meal) {
+            const list = document.getElementById(meal + '-list');
+            const totalEl = document.getElementById(meal + '-total');
+            const items = data[meal] || [];
+            let html = '';
+
+            if (items.length === 0) html = `<p class="text-slate-400 text-center py-6">No items added</p>`;
+            else {
+                items.forEach((item, i) => {
+                    html += `
+                        <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
+                            <div>
+                                <div>${item.name}</div>
+                                <div class="text-xs text-slate-400">${item.cal} kcal</div>
+                            </div>
+                            <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                        </div>`;
+                });
+            }
+            list.innerHTML = html;
+            totalEl.textContent = items.reduce((sum, it) => sum + it.cal, 0) + ' kcal';
+        }
+
+        function renderExercises() {
+            const container = document.getElementById('exercise-list');
+            let html = '';
+            data.exercises.forEach((ex, i) => {
+                const cal = Math.round(ex.minutes * ex.calPerMin);
+                html += `
+                    <div class="flex justify-between items-center bg-orange-50 px-4 py-3 rounded-2xl">
+                        <div>${ex.name} • ${ex.minutes} min</div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-medium">${cal} kcal</span>
+                            <button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html || `<p class="text-slate-400 py-4">No exercises logged</p>`;
+        }
+
+        function calculateTotals() {
+            const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => {
+                return sum + (data[m] || []).reduce((a, b) => a + b.cal, 0);
+            }, 0);
+
+            const burned = data.exercises.reduce((sum, ex) => sum + Math.round(ex.minutes * ex.calPerMin), 0);
+
+            document.getElementById('calories-consumed').textContent = intake + ' kcal';
+            document.getElementById('remaining-calories').textContent = Math.max((data.goal - intake), 0) + ' remaining';
+
+            const progress = Math.min((intake / data.goal) * 100, 100);
+            document.getElementById('progress-bar').style.width = progress + '%';
+        }
+
+        function renderAll() {
+            updateDateDisplay();
+            renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
+            renderExercises();
+            calculateTotals();
+        }
+
+        // Food & Exercise functions
+        let currentMealType = 'breakfast';
+        function showAddModal(meal) {
+            currentMealType = meal;
+            document.getElementById('add-modal').classList.remove('hidden');
+            document.getElementById('food-name').focus();
+        }
+        function hideModal() { document.getElementById('add-modal').classList.add('hidden'); }
+
+        function addFood() {
+            const name = document.getElementById('food-name').value.trim();
+            const cal = parseInt(document.getElementById('food-calories').value);
+            if (!name || !cal) return alert("Enter name and calories");
+
+            if (!data[currentMealType]) data[currentMealType] = [];
+            data[currentMealType].push({name, cal});
+
+            hideModal();
+            renderAll();
+            saveCurrentData();
+        }
+
+        function removeFood(meal, index) {
+            if (confirm("Delete this item?")) {
+                data[meal].splice(index, 1);
+                renderAll();
+                saveCurrentData();
+            }
+        }
+
+        function showExerciseModal() {
+            document.getElementById('exercise-modal').classList.remove('hidden');
+        }
+        function hideExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); }
+
+        function addExercise() {
+            const name = document.getElementById('exercise-name').value.trim();
+            const minutes = parseFloat(document.getElementById('exercise-minutes').value);
+            const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
+
+            if (!name || !minutes || !calPerMin) return alert("Fill all fields");
+
+            data.exercises.push({name, minutes, calPerMin});
+            hideExerciseModal();
+            renderAll();
+            saveCurrentData();
+        }
+
+        function removeExercise(i) {
+            if (confirm("Delete exercise?")) {
+                data.exercises.splice(i, 1);
+                renderAll();
+                saveCurrentData();
+            }
+        }
+
+        function updateGoal() {
+            data.goal = parseInt(document.getElementById('goal-input').value) || 2000;
+            renderAll();
+            saveCurrentData();
+        }
+
+        // Login / Signup
+        function showLoginForm() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('signup-form').classList.add('hidden');
+        }
+        function showSignupForm() {
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('signup-form').classList.remove('hidden');
+        }
+
+        function signup() {
+            const user = document.getElementById('signup-username').value.trim().toLowerCase();
+            const pass = document.getElementById('signup-password').value;
+            if (!user || !pass) return alert("Please fill both fields");
+            if (users[user]) return alert("Username already taken");
+
+            users[user] = { password: pass, history: {} };
+            saveUsers();
+            alert("Account created! Please login.");
+            showLoginForm();
+        }
+
+        function login() {
+            const user = document.getElementById('login-username').value.trim().toLowerCase();
+            const pass = document.getElementById('login-password').value;
+
+            if (!users[user] || users[user].password !== pass) return alert("Invalid username or password");
+
+            currentUser = user;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('current-user-display').textContent = user;
+
+            loadCurrentData();
+            renderCalendar();
+            renderAll();
+        }
+
+        function logout() {
+            if (confirm("Logout?")) {
+                currentUser = null;
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
+            }
+        }
+
+        window.onload = () => {
+            loadUsers();
+            // Auto show login screen
+        };
+    </script>
+</body>
+</html>
