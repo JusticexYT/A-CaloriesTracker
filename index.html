@@ -85,6 +85,12 @@
                 <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
                 <p id="day-name" class="text-slate-500"></p>
 
+                <!-- Barcode Scanner -->
+                <button onclick="startBarcodeScanner()" class="w-full py-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-barcode text-2xl"></i>
+                    Scan Barcode (Packaged Food)
+                </button>
+
                 <!-- Water Intake -->
                 <div class="bg-white rounded-3xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">
@@ -193,6 +199,16 @@
         </div>
     </div>
 
+    <!-- Barcode Scanner Modal -->
+    <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[100] flex flex-col">
+        <div class="p-4 flex justify-between items-center text-white bg-black">
+            <h3 class="font-semibold">Scan Barcode</h3>
+            <button onclick="stopBarcodeScanner()" class="text-3xl">✕</button>
+        </div>
+        <video id="video" class="flex-1 w-full object-cover bg-black"></video>
+        <div id="scan-status" class="p-4 text-center text-white bg-black text-sm">Point camera at barcode...</div>
+    </div>
+
     <!-- Food Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
@@ -251,6 +267,7 @@
         let favoriteFoods = [];
         let favoriteExercises = [];
         let storageAvailable = true;
+        let videoStream = null;
 
         const dailyWaterGoal = 3000;
 
@@ -296,6 +313,7 @@
             }
         }
 
+        // Calendar
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
@@ -396,8 +414,7 @@
                     <button onclick="quickAddFavoriteFood(${i})" class="flex-1 text-left">
                         ❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span>
                     </button>
-                    <button onclick="removeFavoriteFood(${i}); event.stopImmediatePropagation();" 
-                            class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1">
+                    <button onclick="removeFavoriteFood(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
@@ -419,8 +436,7 @@
                     <button onclick="quickAddFavoriteExercise(${i})" class="flex-1 text-left">
                         🏃 ${fav.name} • ${fav.minutes}min
                     </button>
-                    <button onclick="removeFavoriteExercise(${i}); event.stopImmediatePropagation();" 
-                            class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1">
+                    <button onclick="removeFavoriteExercise(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1">
                         <i class="fa-solid fa-trash"></i>
                     </button>
                 </div>
@@ -633,6 +649,79 @@
                 currentUser = null;
                 document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('hidden');
+            }
+        }
+
+        // Barcode Scanner
+        async function startBarcodeScanner() {
+            const modal = document.getElementById('barcode-modal');
+            modal.classList.remove('hidden');
+
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                const video = document.getElementById('video');
+                video.srcObject = videoStream;
+                video.play();
+                detectBarcode(video);
+            } catch(e) {
+                alert("Camera access failed or not supported.");
+                stopBarcodeScanner();
+            }
+        }
+
+        function stopBarcodeScanner() {
+            const modal = document.getElementById('barcode-modal');
+            modal.classList.add('hidden');
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+        }
+
+        async function detectBarcode(video) {
+            const status = document.getElementById('scan-status');
+            if ('BarcodeDetector' in window) {
+                const detector = new BarcodeDetector();
+                const interval = setInterval(async () => {
+                    try {
+                        const barcodes = await detector.detect(video);
+                        if (barcodes.length > 0) {
+                            clearInterval(interval);
+                            const barcode = barcodes[0].rawValue;
+                            status.textContent = `Found: ${barcode}`;
+                            await fetchProductInfo(barcode);
+                            stopBarcodeScanner();
+                        }
+                    } catch(e) {}
+                }, 400);
+            } else {
+                status.textContent = "Barcode scanning not supported on this device.";
+                setTimeout(stopBarcodeScanner, 2000);
+            }
+        }
+
+        async function fetchProductInfo(barcode) {
+            try {
+                const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const result = await res.json();
+                if (result.status === 1 && result.product) {
+                    const p = result.product;
+                    const name = p.product_name || `Product ${barcode}`;
+                    const cal = p.nutriments ? Math.round(p.nutriments['energy-kcal_100g'] || 100) : 100;
+
+                    const meal = prompt(`Found: ${name}\nApprox calories: ${cal} kcal\nAdd to which meal?`, "snacks");
+                    if (meal && ['breakfast','lunch','dinner','snacks'].includes(meal)) {
+                        if (!data[meal]) data[meal] = [];
+                        data[meal].push({name, cal});
+                        renderAll();
+                        saveCurrentData();
+                        alert(`Added ${name} (${cal} kcal)`);
+                    }
+                } else {
+                    alert("Product not found. Please add manually.");
+                }
+            } catch(e) {
+                alert("Could not fetch product info. Please add manually.");
             }
         }
 
