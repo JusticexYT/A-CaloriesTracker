@@ -5,9 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CalTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        // Suppress Tailwind CDN warning
+        tailwind.config = {
+            content: [],
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
+        body { 
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
+        }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .calendar-day { transition: all 0.2s; }
         .calendar-day:hover { background-color: #ecfdf5; }
@@ -97,7 +109,7 @@
                         <button onclick="addWater(1000)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1L</button>
                     </div>
                     <div class="flex gap-3">
-                        <input id="water-manual" type="number" placeholder="Custom amount (ml)" class="flex-1 px-4 py-3 border rounded-2xl focus:outline-none focus:border-blue-500">
+                        <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-4 py-3 border rounded-2xl focus:outline-none">
                         <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl font-medium">Add</button>
                     </div>
                 </div>
@@ -188,7 +200,7 @@
         </div>
     </div>
 
-    <!-- Food Modal -->
+    <!-- Modals -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -213,7 +225,6 @@
         </div>
     </div>
 
-    <!-- Exercise Modal -->
     <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -236,11 +247,15 @@
     </div>
 
     <script>
+        // ... (All the JavaScript from the previous working version remains the same)
+        // I'll paste the full script here for completeness:
+
         let currentUser = null;
         let users = {};
         let currentDate = new Date().toISOString().split('T')[0];
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
+
         let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
         let favoriteFoods = [];
         let favoriteExercises = [];
@@ -321,6 +336,7 @@
 
         function prevMonth() { currentMonth--; if(currentMonth < 0){currentMonth=11; currentYear--;} renderCalendar(); }
         function nextMonth() { currentMonth++; if(currentMonth > 11){currentMonth=0; currentYear++;} renderCalendar(); }
+
         function goToToday() {
             const now = new Date();
             currentDate = now.toISOString().split('T')[0];
@@ -332,7 +348,8 @@
         }
 
         function updateDateDisplay() {
-            const d = new Date(currentDate);
+            const [year, month, day] = currentDate.split('-').map(Number);
+            const d = new Date(year, month - 1, day);
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
@@ -561,9 +578,7 @@
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('current-user-display').textContent = user;
 
-            loadCurrentData();
-            renderCalendar();
-            renderAll();
+            goToToday();
         }
 
         function logout() {
@@ -576,7 +591,6 @@
 
         window.onload = () => {
             loadUsers();
-            goToToday();
         };
     </script>
 </body>
