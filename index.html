@@ -7,12 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // Suppress Tailwind CDN warning
-        tailwind.config = {
-            content: [],
-            theme: {
-                extend: {}
-            }
-        }
+        tailwind.config = { content: [] };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -100,7 +95,7 @@
                         <div class="text-sm font-mono font-medium" id="water-total">0 / 3000 ml</div>
                     </div>
                     <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
-                        <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all" style="width: 0%"></div>
+                        <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
                     </div>
                     <div class="grid grid-cols-4 gap-3 mb-4">
                         <button onclick="addWater(250)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250ml</button>
@@ -200,7 +195,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Food Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -225,6 +220,7 @@
         </div>
     </div>
 
+    <!-- Exercise Modal -->
     <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -247,9 +243,7 @@
     </div>
 
     <script>
-        // ... (All the JavaScript from the previous working version remains the same)
-        // I'll paste the full script here for completeness:
-
+        // ==================== OPTIMIZED CODE ====================
         let currentUser = null;
         let users = {};
         let currentDate = new Date().toISOString().split('T')[0];
@@ -264,17 +258,43 @@
 
         const dailyWaterGoal = 3000;
 
-        function safeGet(key) {
-            try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } 
-            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); return null; }
-        }
-        function safeSet(key, value) {
-            try { localStorage.setItem(key, JSON.stringify(value)); } 
-            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); }
+        // DOM Cache for performance
+        const dom = {};
+
+        function getEl(id) {
+            if (!dom[id]) dom[id] = document.getElementById(id);
+            return dom[id];
         }
 
-        function loadUsers() { const saved = safeGet('caltrack_users'); if(saved) users = saved; }
-        function saveUsers() { if(storageAvailable) safeSet('caltrack_users', users); }
+        // Safe localStorage
+        function safeGet(key) {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : null;
+            } catch(e) {
+                storageAvailable = false;
+                getEl('storage-warning').classList.remove('hidden');
+                return null;
+            }
+        }
+
+        function safeSet(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch(e) {
+                storageAvailable = false;
+                getEl('storage-warning').classList.remove('hidden');
+            }
+        }
+
+        function loadUsers() {
+            const saved = safeGet('caltrack_users');
+            if (saved) users = saved;
+        }
+
+        function saveUsers() {
+            if (storageAvailable) safeSet('caltrack_users', users);
+        }
 
         function getDateData(date) {
             if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [] };
@@ -289,7 +309,7 @@
             favoriteFoods = users[currentUser]?.favoriteFoods || [];
             favoriteExercises = users[currentUser]?.favoriteExercises || [];
             waterIntake = data.waterIntake || 0;
-            document.getElementById('goal-input').value = data.goal || 2000;
+            getEl('goal-input').value = data.goal || 2000;
         }
 
         function saveCurrentData() {
@@ -308,10 +328,11 @@
             }
         }
 
+        // Calendar
         function renderCalendar() {
-            const grid = document.getElementById('calendar-grid');
+            const grid = getEl('calendar-grid');
             grid.innerHTML = '';
-            document.getElementById('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+            getEl('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
 
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -350,9 +371,10 @@
         function updateDateDisplay() {
             const [year, month, day] = currentDate.split('-').map(Number);
             const d = new Date(year, month - 1, day);
-            document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+            getEl('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
+        // Water Intake
         function addWater(ml) {
             waterIntake += ml;
             renderWater();
@@ -360,23 +382,24 @@
         }
 
         function addWaterManual() {
-            const ml = parseInt(document.getElementById('water-manual').value);
+            const ml = parseInt(getEl('water-manual').value);
             if (ml > 0) {
                 waterIntake += ml;
-                document.getElementById('water-manual').value = '';
+                getEl('water-manual').value = '';
                 renderWater();
                 saveCurrentData();
             }
         }
 
         function renderWater() {
-            document.getElementById('water-total').textContent = `${waterIntake} / ${dailyWaterGoal} ml`;
+            getEl('water-total').textContent = `${waterIntake} / ${dailyWaterGoal} ml`;
             const percent = Math.min((waterIntake / dailyWaterGoal) * 100, 100);
-            document.getElementById('water-progress').style.width = percent + '%';
+            getEl('water-progress').style.width = percent + '%';
         }
 
+        // Favorites
         function renderFavoriteFoods() {
-            const container = document.getElementById('favorites-food-bar');
+            const container = getEl('favorites-food-bar');
             container.innerHTML = favoriteFoods.map((fav, i) => `
                 <button onclick="quickAddFavoriteFood(${i})" class="bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
                     ❤️ ${fav.name} (${fav.cal})
@@ -385,7 +408,7 @@
         }
 
         function renderFavoriteExercises() {
-            const container = document.getElementById('favorites-exercise-bar');
+            const container = getEl('favorites-exercise-bar');
             container.innerHTML = favoriteExercises.map((fav, i) => `
                 <button onclick="quickAddFavoriteExercise(${i})" class="bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
                     🏃 ${fav.name} • ${fav.minutes}min
@@ -411,9 +434,10 @@
             saveCurrentData();
         }
 
+        // Meals & Exercise Rendering
         function renderMeal(meal) {
-            const list = document.getElementById(meal + '-list');
-            const totalEl = document.getElementById(meal + '-total');
+            const list = getEl(meal + '-list');
+            const totalEl = getEl(meal + '-total');
             const items = data[meal] || [];
             let html = items.length === 0 ? `<p class="text-slate-400 text-center py-8">No items yet</p>` : '';
 
@@ -432,7 +456,7 @@
         }
 
         function renderExercises() {
-            const container = document.getElementById('exercise-list');
+            const container = getEl('exercise-list');
             let html = '';
             data.exercises.forEach((ex, i) => {
                 const cal = Math.round(ex.minutes * ex.calPerMin);
@@ -451,35 +475,41 @@
         function calculateTotals() {
             const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => sum + (data[m] || []).reduce((a, b) => a + b.cal, 0), 0);
             const goal = data.goal || 2000;
-            document.getElementById('calories-consumed').textContent = intake + ' kcal';
-            document.getElementById('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
-            document.getElementById('progress-bar').style.width = Math.min((intake / goal) * 100, 100) + '%';
+            getEl('calories-consumed').textContent = intake + ' kcal';
+            getEl('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
+            getEl('progress-bar').style.width = Math.min((intake / goal) * 100, 100) + '%';
         }
 
         function renderAll() {
-            updateDateDisplay();
-            renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
-            renderExercises();
-            calculateTotals();
-            renderFavoriteFoods();
-            renderFavoriteExercises();
-            renderWater();
+            requestAnimationFrame(() => {
+                updateDateDisplay();
+                renderMeal('breakfast');
+                renderMeal('lunch');
+                renderMeal('dinner');
+                renderMeal('snacks');
+                renderExercises();
+                calculateTotals();
+                renderFavoriteFoods();
+                renderFavoriteExercises();
+                renderWater();
+            });
         }
 
+        // Modals
         let currentMealType = 'breakfast';
         function showAddModal(meal) {
             currentMealType = meal;
-            document.getElementById('food-name').value = '';
-            document.getElementById('food-calories').value = '';
-            document.getElementById('favorite-food-checkbox').checked = false;
-            document.getElementById('add-modal').classList.remove('hidden');
+            getEl('food-name').value = '';
+            getEl('food-calories').value = '';
+            getEl('favorite-food-checkbox').checked = false;
+            getEl('add-modal').classList.remove('hidden');
         }
-        function hideModal() { document.getElementById('add-modal').classList.add('hidden'); }
+        function hideModal() { getEl('add-modal').classList.add('hidden'); }
 
         function addFood() {
-            const name = document.getElementById('food-name').value.trim();
-            const cal = parseInt(document.getElementById('food-calories').value);
-            const isFavorite = document.getElementById('favorite-food-checkbox').checked;
+            const name = getEl('food-name').value.trim();
+            const cal = parseInt(getEl('food-calories').value);
+            const isFavorite = getEl('favorite-food-checkbox').checked;
 
             if (!name || !cal) return alert("Please enter food name and calories");
 
@@ -505,19 +535,19 @@
         }
 
         function showExerciseModal() {
-            document.getElementById('exercise-name').value = '';
-            document.getElementById('exercise-minutes').value = 30;
-            document.getElementById('cal-per-min').value = 10;
-            document.getElementById('favorite-exercise-checkbox').checked = false;
-            document.getElementById('exercise-modal').classList.remove('hidden');
+            getEl('exercise-name').value = '';
+            getEl('exercise-minutes').value = 30;
+            getEl('cal-per-min').value = 10;
+            getEl('favorite-exercise-checkbox').checked = false;
+            getEl('exercise-modal').classList.remove('hidden');
         }
-        function hideExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); }
+        function hideExerciseModal() { getEl('exercise-modal').classList.add('hidden'); }
 
         function addExercise() {
-            const name = document.getElementById('exercise-name').value.trim();
-            const minutes = parseFloat(document.getElementById('exercise-minutes').value);
-            const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
-            const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
+            const name = getEl('exercise-name').value.trim();
+            const minutes = parseFloat(getEl('exercise-minutes').value);
+            const calPerMin = parseFloat(getEl('cal-per-min').value);
+            const isFavorite = getEl('favorite-exercise-checkbox').checked;
 
             if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
 
@@ -542,23 +572,24 @@
         }
 
         function updateGoal() {
-            data.goal = parseInt(document.getElementById('goal-input').value) || 2000;
+            data.goal = parseInt(getEl('goal-input').value) || 2000;
             renderAll();
             saveCurrentData();
         }
 
+        // Login / Signup
         function showLoginForm() {
-            document.getElementById('login-form').classList.remove('hidden');
-            document.getElementById('signup-form').classList.add('hidden');
+            getEl('login-form').classList.remove('hidden');
+            getEl('signup-form').classList.add('hidden');
         }
         function showSignupForm() {
-            document.getElementById('login-form').classList.add('hidden');
-            document.getElementById('signup-form').classList.remove('hidden');
+            getEl('login-form').classList.add('hidden');
+            getEl('signup-form').classList.remove('hidden');
         }
 
         function signup() {
-            const user = document.getElementById('signup-username').value.trim().toLowerCase();
-            const pass = document.getElementById('signup-password').value;
+            const user = getEl('signup-username').value.trim().toLowerCase();
+            const pass = getEl('signup-password').value;
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
 
@@ -569,14 +600,14 @@
         }
 
         function login() {
-            const user = document.getElementById('login-username').value.trim().toLowerCase();
-            const pass = document.getElementById('login-password').value;
+            const user = getEl('login-username').value.trim().toLowerCase();
+            const pass = getEl('login-password').value;
             if (!users[user] || users[user].password !== pass) return alert("Invalid username or password");
 
             currentUser = user;
-            document.getElementById('login-screen').classList.add('hidden');
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('current-user-display').textContent = user;
+            getEl('login-screen').classList.add('hidden');
+            getEl('main-app').classList.remove('hidden');
+            getEl('current-user-display').textContent = user;
 
             goToToday();
         }
@@ -584,11 +615,12 @@
         function logout() {
             if (confirm("Logout?")) {
                 currentUser = null;
-                document.getElementById('main-app').classList.add('hidden');
-                document.getElementById('login-screen').classList.remove('hidden');
+                getEl('main-app').classList.add('hidden');
+                getEl('login-screen').classList.remove('hidden');
             }
         }
 
+        // Initialize
         window.onload = () => {
             loadUsers();
         };
