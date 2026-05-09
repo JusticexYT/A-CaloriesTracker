@@ -7,10 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { 
-            font-family: 'Inter', system-ui, sans-serif;
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
-        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .calendar-day { transition: all 0.2s; }
         .calendar-day:hover { background-color: #ecfdf5; }
@@ -84,15 +81,43 @@
                 <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
                 <p id="day-name" class="text-slate-500"></p>
 
-                <div class="bg-white rounded-3xl p-5">
-                    <h3 class="font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> Favorite Foods</h3>
-                    <div id="favorites-bar" class="flex gap-2 overflow-x-auto pb-2"></div>
+                <!-- Water Intake -->
+                <div class="bg-white rounded-3xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg flex items-center gap-2"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
+                        <div class="text-sm font-mono font-medium" id="water-total">0 / 3000 ml</div>
+                    </div>
+                    <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
+                        <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all" style="width: 0%"></div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-3 mb-4">
+                        <button onclick="addWater(250)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250ml</button>
+                        <button onclick="addWater(500)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+500ml</button>
+                        <button onclick="addWater(750)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+750ml</button>
+                        <button onclick="addWater(1000)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1L</button>
+                    </div>
+                    <div class="flex gap-3">
+                        <input id="water-manual" type="number" placeholder="Custom amount (ml)" class="flex-1 px-4 py-3 border rounded-2xl focus:outline-none focus:border-blue-500">
+                        <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl font-medium">Add</button>
+                    </div>
                 </div>
 
-                <!-- Goal, Meals, Exercise sections (same as before) -->
+                <!-- Favorites -->
+                <div class="bg-white rounded-3xl p-5 space-y-6">
+                    <div>
+                        <h3 class="font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> Favorite Foods</h3>
+                        <div id="favorites-food-bar" class="flex gap-2 overflow-x-auto pb-2"></div>
+                    </div>
+                    <div>
+                        <h3 class="font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-heart text-orange-500"></i> Favorite Exercises</h3>
+                        <div id="favorites-exercise-bar" class="flex gap-2 overflow-x-auto pb-2"></div>
+                    </div>
+                </div>
+
+                <!-- Calorie Goal -->
                 <div class="bg-white rounded-3xl p-6">
                     <div class="flex justify-between mb-3">
-                        <span class="font-medium">Daily Goal</span>
+                        <span class="font-medium">Daily Calorie Goal</span>
                         <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none">
                     </div>
                     <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
@@ -104,7 +129,7 @@
                     </div>
                 </div>
 
-                <!-- Meals Grid -->
+                <!-- Meals -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="meal-card bg-white rounded-3xl shadow-sm">
                         <div class="bg-amber-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
@@ -163,7 +188,7 @@
         </div>
     </div>
 
-    <!-- Modals (Add Food + Exercise) -->
+    <!-- Food Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -177,7 +202,7 @@
                 <input id="food-name" type="text" placeholder="Food name" class="w-full mb-4 p-4 border rounded-2xl">
                 <input id="food-calories" type="number" placeholder="Calories" class="w-full mb-4 p-4 border rounded-2xl">
                 <label class="flex items-center gap-2 cursor-pointer">
-                    <input type="checkbox" id="favorite-checkbox" class="w-5 h-5 accent-red-500">
+                    <input type="checkbox" id="favorite-food-checkbox" class="w-5 h-5 accent-red-500">
                     <span class="text-sm">Add to Favorites ❤️</span>
                 </label>
             </div>
@@ -188,6 +213,7 @@
         </div>
     </div>
 
+    <!-- Exercise Modal -->
     <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -197,6 +223,10 @@
                     <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border rounded-2xl">
                     <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border rounded-2xl">
                 </div>
+                <label class="flex items-center gap-2 cursor-pointer mt-4">
+                    <input type="checkbox" id="favorite-exercise-checkbox" class="w-5 h-5 accent-orange-500">
+                    <span class="text-sm">Add to Favorite Exercises</span>
+                </label>
             </div>
             <div class="flex border-t">
                 <button onclick="hideExerciseModal()" class="flex-1 py-5 text-slate-500 font-medium">Cancel</button>
@@ -212,10 +242,13 @@
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
         let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
-        let favorites = [];
+        let favoriteFoods = [];
+        let favoriteExercises = [];
+        let waterIntake = 0;
         let storageAvailable = true;
 
-        // Safe localStorage
+        const dailyWaterGoal = 3000;
+
         function safeGet(key) {
             try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } 
             catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); return null; }
@@ -229,21 +262,24 @@
         function saveUsers() { if(storageAvailable) safeSet('caltrack_users', users); }
 
         function getDateData(date) {
-            if (!users[currentUser]) users[currentUser] = { history: {}, favorites: [] };
+            if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [] };
             if (!users[currentUser].history[date]) {
-                users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
+                users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterIntake: 0 };
             }
             return users[currentUser].history[date];
         }
 
         function loadCurrentData() {
             data = getDateData(currentDate);
-            favorites = users[currentUser]?.favorites || [];
+            favoriteFoods = users[currentUser]?.favoriteFoods || [];
+            favoriteExercises = users[currentUser]?.favoriteExercises || [];
+            waterIntake = data.waterIntake || 0;
             document.getElementById('goal-input').value = data.goal || 2000;
         }
 
         function saveCurrentData() {
             if (currentUser) {
+                data.waterIntake = waterIntake;
                 users[currentUser].history[currentDate] = data;
                 saveUsers();
             }
@@ -251,36 +287,30 @@
 
         function saveFavorites() {
             if (currentUser) {
-                users[currentUser].favorites = favorites;
+                users[currentUser].favoriteFoods = favoriteFoods;
+                users[currentUser].favoriteExercises = favoriteExercises;
                 saveUsers();
             }
         }
 
-        // ==================== FIXED CALENDAR ====================
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
-            document.getElementById('calendar-title').textContent = 
-                new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+            document.getElementById('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
 
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const todayStr = new Date().toISOString().split('T')[0];
 
-            // Empty slots
             for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
 
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                
                 const div = document.createElement('div');
-                div.className = `calendar-day py-3 rounded-2xl cursor-pointer text-sm 
-                    ${dateStr === todayStr ? 'today' : ''} 
-                    ${dateStr === currentDate ? 'selected' : ''}`;
+                div.className = `calendar-day py-3 rounded-2xl cursor-pointer text-sm ${dateStr === todayStr ? 'today' : ''} ${dateStr === currentDate ? 'selected' : ''}`;
                 div.textContent = day;
-                
                 div.onclick = () => {
-                    currentDate = dateStr;           // This was the main fix
+                    currentDate = dateStr;
                     loadCurrentData();
                     renderAll();
                     renderCalendar();
@@ -289,9 +319,8 @@
             }
         }
 
-        function prevMonth() { currentMonth--; if(currentMonth < 0){ currentMonth = 11; currentYear--; } renderCalendar(); }
-        function nextMonth() { currentMonth++; if(currentMonth > 11){ currentMonth = 0; currentYear++; } renderCalendar(); }
-
+        function prevMonth() { currentMonth--; if(currentMonth < 0){currentMonth=11; currentYear--;} renderCalendar(); }
+        function nextMonth() { currentMonth++; if(currentMonth > 11){currentMonth=0; currentYear++;} renderCalendar(); }
         function goToToday() {
             const now = new Date();
             currentDate = now.toISOString().split('T')[0];
@@ -303,27 +332,64 @@
         }
 
         function updateDateDisplay() {
-            const d = new Date(currentDate + "T00:00:00");
-            document.getElementById('selected-date-display').textContent = 
-                d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+            const d = new Date(currentDate);
+            document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
-        // Rest of functions (renderFavorites, renderMeal, etc.) remain the same
-        function renderFavorites() {
-            const container = document.getElementById('favorites-bar');
-            container.innerHTML = favorites.map((fav, i) => `
-                <button onclick="quickAddFavorite(${i})" class="bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
-                    ❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span>
+        function addWater(ml) {
+            waterIntake += ml;
+            renderWater();
+            saveCurrentData();
+        }
+
+        function addWaterManual() {
+            const ml = parseInt(document.getElementById('water-manual').value);
+            if (ml > 0) {
+                waterIntake += ml;
+                document.getElementById('water-manual').value = '';
+                renderWater();
+                saveCurrentData();
+            }
+        }
+
+        function renderWater() {
+            document.getElementById('water-total').textContent = `${waterIntake} / ${dailyWaterGoal} ml`;
+            const percent = Math.min((waterIntake / dailyWaterGoal) * 100, 100);
+            document.getElementById('water-progress').style.width = percent + '%';
+        }
+
+        function renderFavoriteFoods() {
+            const container = document.getElementById('favorites-food-bar');
+            container.innerHTML = favoriteFoods.map((fav, i) => `
+                <button onclick="quickAddFavoriteFood(${i})" class="bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
+                    ❤️ ${fav.name} (${fav.cal})
                 </button>
-            `).join('') || '<p class="text-slate-400 text-sm py-2">No favorites yet</p>';
+            `).join('') || '<p class="text-slate-400 text-sm">No favorite foods yet</p>';
         }
 
-        function quickAddFavorite(index) {
-            const fav = favorites[index];
-            const meal = prompt("Add to which meal? (breakfast, lunch, dinner, snacks)", "snacks");
+        function renderFavoriteExercises() {
+            const container = document.getElementById('favorites-exercise-bar');
+            container.innerHTML = favoriteExercises.map((fav, i) => `
+                <button onclick="quickAddFavoriteExercise(${i})" class="bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
+                    🏃 ${fav.name} • ${fav.minutes}min
+                </button>
+            `).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
+        }
+
+        function quickAddFavoriteFood(i) {
+            const fav = favoriteFoods[i];
+            const meal = prompt("Add to which meal?", "snacks");
             if (!meal) return;
             if (!data[meal]) data[meal] = [];
             data[meal].push({name: fav.name, cal: fav.cal});
+            renderAll();
+            saveCurrentData();
+        }
+
+        function quickAddFavoriteExercise(i) {
+            const fav = favoriteExercises[i];
+            if (!data.exercises) data.exercises = [];
+            data.exercises.push({name: fav.name, minutes: fav.minutes, calPerMin: fav.calPerMin});
             renderAll();
             saveCurrentData();
         }
@@ -378,7 +444,9 @@
             renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
             renderExercises();
             calculateTotals();
-            renderFavorites();
+            renderFavoriteFoods();
+            renderFavoriteExercises();
+            renderWater();
         }
 
         let currentMealType = 'breakfast';
@@ -386,7 +454,7 @@
             currentMealType = meal;
             document.getElementById('food-name').value = '';
             document.getElementById('food-calories').value = '';
-            document.getElementById('favorite-checkbox').checked = false;
+            document.getElementById('favorite-food-checkbox').checked = false;
             document.getElementById('add-modal').classList.remove('hidden');
         }
         function hideModal() { document.getElementById('add-modal').classList.add('hidden'); }
@@ -394,7 +462,7 @@
         function addFood() {
             const name = document.getElementById('food-name').value.trim();
             const cal = parseInt(document.getElementById('food-calories').value);
-            const isFavorite = document.getElementById('favorite-checkbox').checked;
+            const isFavorite = document.getElementById('favorite-food-checkbox').checked;
 
             if (!name || !cal) return alert("Please enter food name and calories");
 
@@ -402,7 +470,7 @@
             data[currentMealType].push({name, cal});
 
             if (isFavorite) {
-                favorites.push({name, cal});
+                favoriteFoods.push({name, cal});
                 saveFavorites();
             }
 
@@ -419,16 +487,30 @@
             }
         }
 
-        function showExerciseModal() { document.getElementById('exercise-modal').classList.remove('hidden'); }
+        function showExerciseModal() {
+            document.getElementById('exercise-name').value = '';
+            document.getElementById('exercise-minutes').value = 30;
+            document.getElementById('cal-per-min').value = 10;
+            document.getElementById('favorite-exercise-checkbox').checked = false;
+            document.getElementById('exercise-modal').classList.remove('hidden');
+        }
         function hideExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); }
 
         function addExercise() {
             const name = document.getElementById('exercise-name').value.trim();
             const minutes = parseFloat(document.getElementById('exercise-minutes').value);
             const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
+            const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
+
             if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
-            
+
             data.exercises.push({name, minutes, calPerMin});
+
+            if (isFavorite) {
+                favoriteExercises.push({name, minutes, calPerMin});
+                saveFavorites();
+            }
+
             hideExerciseModal();
             renderAll();
             saveCurrentData();
@@ -463,7 +545,7 @@
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
 
-            users[user] = { password: pass, history: {}, favorites: [] };
+            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [] };
             saveUsers();
             alert("Account created! Please login.");
             showLoginForm();
@@ -494,8 +576,7 @@
 
         window.onload = () => {
             loadUsers();
-            // Auto load today on first visit
-            if (!currentUser) goToToday();
+            goToToday();
         };
     </script>
 </body>
