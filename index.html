@@ -39,7 +39,8 @@
                 <button onclick="login()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
             </div>
             <div id="signup-form" class="hidden">
-                <input id="signup-username" type="text" placeholder="Choose username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="signup-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="signup-displayname" type="text" placeholder="Display Name (e.g. Sofia)" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
                 <input id="signup-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
                 <button onclick="signup()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Create Account</button>
             </div>
@@ -57,7 +58,7 @@
                 <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-3xl">🍎</div>
                 <div>
                     <h1 class="text-3xl font-bold">CalTrack</h1>
-                    <p class="text-sm text-slate-500">Welcome, <span id="current-user-display" class="font-medium"></span></p>
+                    <p id="greeting" class="text-lg font-medium"></p>
                 </div>
             </div>
             <div class="flex gap-2">
@@ -313,7 +314,13 @@
             }
         }
 
-        // Calendar
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            let greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+            const displayName = users[currentUser]?.displayName || currentUser || "Friend";
+            document.getElementById('greeting').innerHTML = `${greeting}, <span class="text-emerald-600">${displayName}</span>!`;
+        }
+
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
@@ -362,10 +369,7 @@
         // Water Intake
         function addWater(ml) {
             if (!data.waterEntries) data.waterEntries = [];
-            data.waterEntries.push({
-                amount: ml,
-                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
-            });
+            data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
             renderWater();
             saveCurrentData();
         }
@@ -399,14 +403,12 @@
                             <span class="text-xs text-slate-500 ml-3">${entry.time}</span>
                         </div>
                     </div>
-                    <button onclick="removeWater(${i})" class="text-red-400 hover:text-red-600">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
+                    <button onclick="removeWater(${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
         }
 
-        // Favorites with Delete
+        // Favorites
         function renderFavoriteFoods() {
             const container = document.getElementById('favorites-food-bar');
             container.innerHTML = favoriteFoods.map((fav, i) => `
@@ -621,13 +623,21 @@
 
         function signup() {
             const user = document.getElementById('signup-username').value.trim().toLowerCase();
+            const displayName = document.getElementById('signup-displayname').value.trim() || user;
             const pass = document.getElementById('signup-password').value;
-            if (!user || !pass) return alert("Please fill both fields");
+
+            if (!user || !pass) return alert("Please fill all fields");
             if (users[user]) return alert("Username already taken");
 
-            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [] };
+            users[user] = { 
+                password: pass, 
+                displayName: displayName,
+                history: {}, 
+                favoriteFoods: [], 
+                favoriteExercises: [] 
+            };
             saveUsers();
-            alert("Account created! Please login.");
+            alert("Account created successfully! You can now login.");
             showLoginForm();
         }
 
@@ -641,6 +651,7 @@
             document.getElementById('main-app').classList.remove('hidden');
             document.getElementById('current-user-display').textContent = user;
 
+            updateGreeting();
             goToToday();
         }
 
@@ -649,79 +660,6 @@
                 currentUser = null;
                 document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('hidden');
-            }
-        }
-
-        // Barcode Scanner
-        async function startBarcodeScanner() {
-            const modal = document.getElementById('barcode-modal');
-            modal.classList.remove('hidden');
-
-            try {
-                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                const video = document.getElementById('video');
-                video.srcObject = videoStream;
-                video.play();
-                detectBarcode(video);
-            } catch(e) {
-                alert("Camera access failed or not supported.");
-                stopBarcodeScanner();
-            }
-        }
-
-        function stopBarcodeScanner() {
-            const modal = document.getElementById('barcode-modal');
-            modal.classList.add('hidden');
-            if (videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-        }
-
-        async function detectBarcode(video) {
-            const status = document.getElementById('scan-status');
-            if ('BarcodeDetector' in window) {
-                const detector = new BarcodeDetector();
-                const interval = setInterval(async () => {
-                    try {
-                        const barcodes = await detector.detect(video);
-                        if (barcodes.length > 0) {
-                            clearInterval(interval);
-                            const barcode = barcodes[0].rawValue;
-                            status.textContent = `Found: ${barcode}`;
-                            await fetchProductInfo(barcode);
-                            stopBarcodeScanner();
-                        }
-                    } catch(e) {}
-                }, 400);
-            } else {
-                status.textContent = "Barcode scanning not supported on this device.";
-                setTimeout(stopBarcodeScanner, 2000);
-            }
-        }
-
-        async function fetchProductInfo(barcode) {
-            try {
-                const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                const result = await res.json();
-                if (result.status === 1 && result.product) {
-                    const p = result.product;
-                    const name = p.product_name || `Product ${barcode}`;
-                    const cal = p.nutriments ? Math.round(p.nutriments['energy-kcal_100g'] || 100) : 100;
-
-                    const meal = prompt(`Found: ${name}\nApprox calories: ${cal} kcal\nAdd to which meal?`, "snacks");
-                    if (meal && ['breakfast','lunch','dinner','snacks'].includes(meal)) {
-                        if (!data[meal]) data[meal] = [];
-                        data[meal].push({name, cal});
-                        renderAll();
-                        saveCurrentData();
-                        alert(`Added ${name} (${cal} kcal)`);
-                    }
-                } else {
-                    alert("Product not found. Please add manually.");
-                }
-            } catch(e) {
-                alert("Could not fetch product info. Please add manually.");
             }
         }
 
@@ -737,7 +675,6 @@
 
         window.onload = () => {
             loadUsers();
-            goToToday();
         };
     </script>
 </body>
