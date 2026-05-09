@@ -29,33 +29,19 @@
                 <h1 class="text-4xl font-bold">CalTrack</h1>
                 <p class="text-slate-500">For you & her ❤️</p>
             </div>
-
-            <!-- Improved Tabs -->
             <div class="flex border-b mb-6">
-                <button onclick="showLoginForm()" id="tab-login" 
-                        class="tab-active flex-1 py-3 font-medium text-center">Login</button>
-                <button onclick="showSignupForm()" id="tab-signup" 
-                        class="flex-1 py-3 font-medium text-center text-slate-400">Sign Up</button>
+                <button onclick="showLoginForm()" id="tab-login" class="tab-active flex-1 py-3 font-medium text-center">Login</button>
+                <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-3 font-medium text-center text-slate-400">Sign Up</button>
             </div>
-
-            <!-- Login Form -->
             <div id="login-form">
-                <input id="login-username" type="text" placeholder="Username" 
-                       class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <input id="login-password" type="password" placeholder="Password" 
-                       class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <button onclick="login()" 
-                        class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
+                <input id="login-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="login-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <button onclick="login()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
             </div>
-
-            <!-- Signup Form -->
             <div id="signup-form" class="hidden">
-                <input id="signup-username" type="text" placeholder="Choose username" 
-                       class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <input id="signup-password" type="password" placeholder="Password" 
-                       class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <button onclick="signup()" 
-                        class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Create Account</button>
+                <input id="signup-username" type="text" placeholder="Choose username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="signup-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <button onclick="signup()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Create Account</button>
             </div>
         </div>
     </div>
@@ -429,10 +415,24 @@
         function renderFavoriteExercises() {
             const container = document.getElementById('favorites-exercise-bar');
             container.innerHTML = favoriteExercises.map((fav, i) => `
-                <button onclick="quickAddFavoriteExercise(${i})" class="bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
-                    🏃 ${fav.name} • ${fav.minutes}min
-                </button>
+                <div class="group relative bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
+                    <button onclick="quickAddFavoriteExercise(${i})" class="flex-1 text-left">
+                        🏃 ${fav.name} • ${fav.minutes}min
+                    </button>
+                    <button onclick="removeFavoriteExercise(${i}); event.stopImmediatePropagation();" 
+                            class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
             `).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
+        }
+
+        function removeFavoriteExercise(index) {
+            if (confirm("Remove this favorite exercise?")) {
+                favoriteExercises.splice(index, 1);
+                saveFavorites();
+                renderFavoriteExercises();
+            }
         }
 
         function quickAddFavoriteFood(i) {
@@ -611,7 +611,7 @@
 
             users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [] };
             saveUsers();
-            alert("Account created successfully! You can now login.");
+            alert("Account created! Please login.");
             showLoginForm();
         }
 
