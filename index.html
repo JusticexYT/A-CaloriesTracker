@@ -6,15 +6,11 @@
     <title>CalTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Suppress Tailwind CDN warning
         tailwind.config = { content: [] };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { 
-            font-family: 'Inter', system-ui, sans-serif; 
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
-        }
+        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .calendar-day { transition: all 0.2s; }
         .calendar-day:hover { background-color: #ecfdf5; }
@@ -97,16 +93,21 @@
                     <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
                         <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
                     </div>
-                    <div class="grid grid-cols-4 gap-3 mb-4">
+
+                    <div class="grid grid-cols-4 gap-3 mb-5">
                         <button onclick="addWater(250)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250ml</button>
                         <button onclick="addWater(500)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+500ml</button>
                         <button onclick="addWater(750)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+750ml</button>
                         <button onclick="addWater(1000)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1L</button>
                     </div>
-                    <div class="flex gap-3">
+
+                    <div class="flex gap-3 mb-6">
                         <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-4 py-3 border rounded-2xl focus:outline-none">
                         <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl font-medium">Add</button>
                     </div>
+
+                    <!-- Water Entries -->
+                    <div id="water-entries" class="space-y-2 max-h-64 overflow-y-auto pr-2"></div>
                 </div>
 
                 <!-- Favorites -->
@@ -243,63 +244,35 @@
     </div>
 
     <script>
-        // ==================== OPTIMIZED CODE ====================
         let currentUser = null;
         let users = {};
         let currentDate = new Date().toISOString().split('T')[0];
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
 
-        let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
+        let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
         let favoriteFoods = [];
         let favoriteExercises = [];
-        let waterIntake = 0;
         let storageAvailable = true;
 
         const dailyWaterGoal = 3000;
 
-        // DOM Cache for performance
-        const dom = {};
-
-        function getEl(id) {
-            if (!dom[id]) dom[id] = document.getElementById(id);
-            return dom[id];
-        }
-
-        // Safe localStorage
         function safeGet(key) {
-            try {
-                const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : null;
-            } catch(e) {
-                storageAvailable = false;
-                getEl('storage-warning').classList.remove('hidden');
-                return null;
-            }
+            try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } 
+            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); return null; }
         }
-
         function safeSet(key, value) {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-            } catch(e) {
-                storageAvailable = false;
-                getEl('storage-warning').classList.remove('hidden');
-            }
+            try { localStorage.setItem(key, JSON.stringify(value)); } 
+            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); }
         }
 
-        function loadUsers() {
-            const saved = safeGet('caltrack_users');
-            if (saved) users = saved;
-        }
-
-        function saveUsers() {
-            if (storageAvailable) safeSet('caltrack_users', users);
-        }
+        function loadUsers() { const saved = safeGet('caltrack_users'); if(saved) users = saved; }
+        function saveUsers() { if(storageAvailable) safeSet('caltrack_users', users); }
 
         function getDateData(date) {
             if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [] };
             if (!users[currentUser].history[date]) {
-                users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterIntake: 0 };
+                users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
             }
             return users[currentUser].history[date];
         }
@@ -308,13 +281,11 @@
             data = getDateData(currentDate);
             favoriteFoods = users[currentUser]?.favoriteFoods || [];
             favoriteExercises = users[currentUser]?.favoriteExercises || [];
-            waterIntake = data.waterIntake || 0;
-            getEl('goal-input').value = data.goal || 2000;
+            document.getElementById('goal-input').value = data.goal || 2000;
         }
 
         function saveCurrentData() {
             if (currentUser) {
-                data.waterIntake = waterIntake;
                 users[currentUser].history[currentDate] = data;
                 saveUsers();
             }
@@ -330,9 +301,9 @@
 
         // Calendar
         function renderCalendar() {
-            const grid = getEl('calendar-grid');
+            const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
-            getEl('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+            document.getElementById('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
 
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
@@ -371,35 +342,66 @@
         function updateDateDisplay() {
             const [year, month, day] = currentDate.split('-').map(Number);
             const d = new Date(year, month - 1, day);
-            getEl('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+            document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
         // Water Intake
         function addWater(ml) {
-            waterIntake += ml;
+            data.waterEntries.push({
+                amount: ml,
+                time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+            });
             renderWater();
             saveCurrentData();
         }
 
         function addWaterManual() {
-            const ml = parseInt(getEl('water-manual').value);
+            const ml = parseInt(document.getElementById('water-manual').value);
             if (ml > 0) {
-                waterIntake += ml;
-                getEl('water-manual').value = '';
+                data.waterEntries.push({
+                    amount: ml,
+                    time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})
+                });
+                document.getElementById('water-manual').value = '';
+                renderWater();
+                saveCurrentData();
+            }
+        }
+
+        function removeWater(index) {
+            if (confirm("Remove this water entry?")) {
+                data.waterEntries.splice(index, 1);
                 renderWater();
                 saveCurrentData();
             }
         }
 
         function renderWater() {
-            getEl('water-total').textContent = `${waterIntake} / ${dailyWaterGoal} ml`;
-            const percent = Math.min((waterIntake / dailyWaterGoal) * 100, 100);
-            getEl('water-progress').style.width = percent + '%';
+            const total = data.waterEntries.reduce((sum, entry) => sum + entry.amount, 0);
+            document.getElementById('water-total').textContent = `${total} / ${dailyWaterGoal} ml`;
+            const percent = Math.min((total / dailyWaterGoal) * 100, 100);
+            document.getElementById('water-progress').style.width = percent + '%';
+
+            const container = document.getElementById('water-entries');
+            container.innerHTML = data.waterEntries.map((entry, i) => `
+                <div class="flex justify-between items-center bg-blue-50 px-4 py-3 rounded-2xl">
+                    <div class="flex items-center gap-3">
+                        <span class="text-blue-600 text-xl">💧</span>
+                        <div>
+                            <span class="font-medium">${entry.amount} ml</span>
+                            <span class="text-xs text-slate-500 ml-3">${entry.time}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeWater(${i})" class="text-red-400 hover:text-red-600 p-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('');
         }
 
-        // Favorites
+        // Rest of functions (same as previous)
         function renderFavoriteFoods() {
-            const container = getEl('favorites-food-bar');
+            const container = document.getElementById('favorites-food-bar');
             container.innerHTML = favoriteFoods.map((fav, i) => `
                 <button onclick="quickAddFavoriteFood(${i})" class="bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
                     ❤️ ${fav.name} (${fav.cal})
@@ -408,7 +410,7 @@
         }
 
         function renderFavoriteExercises() {
-            const container = getEl('favorites-exercise-bar');
+            const container = document.getElementById('favorites-exercise-bar');
             container.innerHTML = favoriteExercises.map((fav, i) => `
                 <button onclick="quickAddFavoriteExercise(${i})" class="bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
                     🏃 ${fav.name} • ${fav.minutes}min
@@ -434,10 +436,9 @@
             saveCurrentData();
         }
 
-        // Meals & Exercise Rendering
         function renderMeal(meal) {
-            const list = getEl(meal + '-list');
-            const totalEl = getEl(meal + '-total');
+            const list = document.getElementById(meal + '-list');
+            const totalEl = document.getElementById(meal + '-total');
             const items = data[meal] || [];
             let html = items.length === 0 ? `<p class="text-slate-400 text-center py-8">No items yet</p>` : '';
 
@@ -456,7 +457,7 @@
         }
 
         function renderExercises() {
-            const container = getEl('exercise-list');
+            const container = document.getElementById('exercise-list');
             let html = '';
             data.exercises.forEach((ex, i) => {
                 const cal = Math.round(ex.minutes * ex.calPerMin);
@@ -475,41 +476,35 @@
         function calculateTotals() {
             const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => sum + (data[m] || []).reduce((a, b) => a + b.cal, 0), 0);
             const goal = data.goal || 2000;
-            getEl('calories-consumed').textContent = intake + ' kcal';
-            getEl('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
-            getEl('progress-bar').style.width = Math.min((intake / goal) * 100, 100) + '%';
+            document.getElementById('calories-consumed').textContent = intake + ' kcal';
+            document.getElementById('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
+            document.getElementById('progress-bar').style.width = Math.min((intake / goal) * 100, 100) + '%';
         }
 
         function renderAll() {
-            requestAnimationFrame(() => {
-                updateDateDisplay();
-                renderMeal('breakfast');
-                renderMeal('lunch');
-                renderMeal('dinner');
-                renderMeal('snacks');
-                renderExercises();
-                calculateTotals();
-                renderFavoriteFoods();
-                renderFavoriteExercises();
-                renderWater();
-            });
+            updateDateDisplay();
+            renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
+            renderExercises();
+            calculateTotals();
+            renderFavoriteFoods();
+            renderFavoriteExercises();
+            renderWater();
         }
 
-        // Modals
         let currentMealType = 'breakfast';
         function showAddModal(meal) {
             currentMealType = meal;
-            getEl('food-name').value = '';
-            getEl('food-calories').value = '';
-            getEl('favorite-food-checkbox').checked = false;
-            getEl('add-modal').classList.remove('hidden');
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-calories').value = '';
+            document.getElementById('favorite-food-checkbox').checked = false;
+            document.getElementById('add-modal').classList.remove('hidden');
         }
-        function hideModal() { getEl('add-modal').classList.add('hidden'); }
+        function hideModal() { document.getElementById('add-modal').classList.add('hidden'); }
 
         function addFood() {
-            const name = getEl('food-name').value.trim();
-            const cal = parseInt(getEl('food-calories').value);
-            const isFavorite = getEl('favorite-food-checkbox').checked;
+            const name = document.getElementById('food-name').value.trim();
+            const cal = parseInt(document.getElementById('food-calories').value);
+            const isFavorite = document.getElementById('favorite-food-checkbox').checked;
 
             if (!name || !cal) return alert("Please enter food name and calories");
 
@@ -535,19 +530,19 @@
         }
 
         function showExerciseModal() {
-            getEl('exercise-name').value = '';
-            getEl('exercise-minutes').value = 30;
-            getEl('cal-per-min').value = 10;
-            getEl('favorite-exercise-checkbox').checked = false;
-            getEl('exercise-modal').classList.remove('hidden');
+            document.getElementById('exercise-name').value = '';
+            document.getElementById('exercise-minutes').value = 30;
+            document.getElementById('cal-per-min').value = 10;
+            document.getElementById('favorite-exercise-checkbox').checked = false;
+            document.getElementById('exercise-modal').classList.remove('hidden');
         }
-        function hideExerciseModal() { getEl('exercise-modal').classList.add('hidden'); }
+        function hideExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); }
 
         function addExercise() {
-            const name = getEl('exercise-name').value.trim();
-            const minutes = parseFloat(getEl('exercise-minutes').value);
-            const calPerMin = parseFloat(getEl('cal-per-min').value);
-            const isFavorite = getEl('favorite-exercise-checkbox').checked;
+            const name = document.getElementById('exercise-name').value.trim();
+            const minutes = parseFloat(document.getElementById('exercise-minutes').value);
+            const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
+            const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
 
             if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
 
@@ -572,24 +567,23 @@
         }
 
         function updateGoal() {
-            data.goal = parseInt(getEl('goal-input').value) || 2000;
+            data.goal = parseInt(document.getElementById('goal-input').value) || 2000;
             renderAll();
             saveCurrentData();
         }
 
-        // Login / Signup
         function showLoginForm() {
-            getEl('login-form').classList.remove('hidden');
-            getEl('signup-form').classList.add('hidden');
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('signup-form').classList.add('hidden');
         }
         function showSignupForm() {
-            getEl('login-form').classList.add('hidden');
-            getEl('signup-form').classList.remove('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('signup-form').classList.remove('hidden');
         }
 
         function signup() {
-            const user = getEl('signup-username').value.trim().toLowerCase();
-            const pass = getEl('signup-password').value;
+            const user = document.getElementById('signup-username').value.trim().toLowerCase();
+            const pass = document.getElementById('signup-password').value;
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
 
@@ -600,14 +594,14 @@
         }
 
         function login() {
-            const user = getEl('login-username').value.trim().toLowerCase();
-            const pass = getEl('login-password').value;
+            const user = document.getElementById('login-username').value.trim().toLowerCase();
+            const pass = document.getElementById('login-password').value;
             if (!users[user] || users[user].password !== pass) return alert("Invalid username or password");
 
             currentUser = user;
-            getEl('login-screen').classList.add('hidden');
-            getEl('main-app').classList.remove('hidden');
-            getEl('current-user-display').textContent = user;
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('current-user-display').textContent = user;
 
             goToToday();
         }
@@ -615,14 +609,14 @@
         function logout() {
             if (confirm("Logout?")) {
                 currentUser = null;
-                getEl('main-app').classList.add('hidden');
-                getEl('login-screen').classList.remove('hidden');
+                document.getElementById('main-app').classList.add('hidden');
+                document.getElementById('login-screen').classList.remove('hidden');
             }
         }
 
-        // Initialize
         window.onload = () => {
             loadUsers();
+            goToToday();
         };
     </script>
 </body>
