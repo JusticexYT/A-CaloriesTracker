@@ -93,19 +93,16 @@
                     <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
                         <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
                     </div>
-
                     <div class="grid grid-cols-4 gap-3 mb-5">
                         <button onclick="addWater(250)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250ml</button>
                         <button onclick="addWater(500)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+500ml</button>
                         <button onclick="addWater(750)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+750ml</button>
                         <button onclick="addWater(1000)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1L</button>
                     </div>
-
                     <div class="flex gap-3 mb-6">
                         <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-4 py-3 border rounded-2xl focus:outline-none">
                         <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl font-medium">Add</button>
                     </div>
-
                     <div id="water-entries" class="space-y-2 max-h-64 overflow-y-auto"></div>
                 </div>
 
@@ -195,7 +192,7 @@
         </div>
     </div>
 
-    <!-- Modals -->
+    <!-- Food Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -220,6 +217,7 @@
         </div>
     </div>
 
+    <!-- Exercise Modal -->
     <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -297,7 +295,6 @@
             }
         }
 
-        // Calendar (fixed)
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
@@ -390,6 +387,102 @@
             `).join('');
         }
 
+        // Favorites with Delete
+        function renderFavoriteFoods() {
+            const container = document.getElementById('favorites-food-bar');
+            container.innerHTML = favoriteFoods.map((fav, i) => `
+                <div class="group relative bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
+                    <button onclick="quickAddFavoriteFood(${i})" class="flex-1 text-left">
+                        ❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span>
+                    </button>
+                    <button onclick="removeFavoriteFood(${i}); event.stopImmediatePropagation();" 
+                            class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm">No favorite foods yet</p>';
+        }
+
+        function removeFavoriteFood(index) {
+            if (confirm("Remove this favorite food?")) {
+                favoriteFoods.splice(index, 1);
+                saveFavorites();
+                renderFavoriteFoods();
+            }
+        }
+
+        function renderFavoriteExercises() {
+            const container = document.getElementById('favorites-exercise-bar');
+            container.innerHTML = favoriteExercises.map((fav, i) => `
+                <button onclick="quickAddFavoriteExercise(${i})" class="bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
+                    🏃 ${fav.name} • ${fav.minutes}min
+                </button>
+            `).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
+        }
+
+        function quickAddFavoriteFood(i) {
+            const fav = favoriteFoods[i];
+            const meal = prompt("Add to which meal?", "snacks");
+            if (!meal) return;
+            if (!data[meal]) data[meal] = [];
+            data[meal].push({name: fav.name, cal: fav.cal});
+            renderAll();
+            saveCurrentData();
+        }
+
+        function quickAddFavoriteExercise(i) {
+            const fav = favoriteExercises[i];
+            if (!data.exercises) data.exercises = [];
+            data.exercises.push({name: fav.name, minutes: fav.minutes, calPerMin: fav.calPerMin});
+            renderAll();
+            saveCurrentData();
+        }
+
+        function renderMeal(meal) {
+            const list = document.getElementById(meal + '-list');
+            const totalEl = document.getElementById(meal + '-total');
+            const items = data[meal] || [];
+            let html = items.length === 0 ? `<p class="text-slate-400 text-center py-8">No items yet</p>` : '';
+
+            items.forEach((item, i) => {
+                html += `
+                    <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
+                        <div>
+                            <div class="font-medium">${item.name}</div>
+                            <div class="text-xs text-slate-400">${item.cal} kcal</div>
+                        </div>
+                        <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+            });
+            list.innerHTML = html;
+            totalEl.textContent = items.reduce((sum, it) => sum + it.cal, 0) + ' kcal';
+        }
+
+        function renderExercises() {
+            const container = document.getElementById('exercise-list');
+            let html = '';
+            data.exercises.forEach((ex, i) => {
+                const cal = Math.round(ex.minutes * ex.calPerMin);
+                html += `
+                    <div class="flex justify-between items-center bg-orange-50 px-4 py-3 rounded-2xl">
+                        <div>${ex.name} • ${ex.minutes} min</div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-medium">${cal} kcal</span>
+                            <button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
+            });
+            container.innerHTML = html || `<p class="text-slate-400 py-4">No exercises logged</p>`;
+        }
+
+        function calculateTotals() {
+            const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => sum + (data[m] || []).reduce((a, b) => a + b.cal, 0), 0);
+            const goal = data.goal || 2000;
+            document.getElementById('calories-consumed').textContent = intake + ' kcal';
+            document.getElementById('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
+            document.getElementById('progress-bar').style.width = Math.min((intake / goal) * 100, 100) + '%';
+        }
+
         function renderAll() {
             updateDateDisplay();
             renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
@@ -400,7 +493,6 @@
             renderWater();
         }
 
-        // Rest of the functions (Food, Exercise, Login, etc.)
         let currentMealType = 'breakfast';
         function showAddModal(meal) {
             currentMealType = meal;
@@ -478,87 +570,6 @@
 
         function updateGoal() {
             data.goal = parseInt(document.getElementById('goal-input').value) || 2000;
-            renderAll();
-            saveCurrentData();
-        }
-
-        function renderMeal(meal) {
-            const list = document.getElementById(meal + '-list');
-            const totalEl = document.getElementById(meal + '-total');
-            const items = data[meal] || [];
-            let html = items.length === 0 ? `<p class="text-slate-400 text-center py-8">No items yet</p>` : '';
-
-            items.forEach((item, i) => {
-                html += `
-                    <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
-                        <div>
-                            <div class="font-medium">${item.name}</div>
-                            <div class="text-xs text-slate-400">${item.cal} kcal</div>
-                        </div>
-                        <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
-                    </div>`;
-            });
-            list.innerHTML = html;
-            totalEl.textContent = items.reduce((sum, it) => sum + it.cal, 0) + ' kcal';
-        }
-
-        function renderExercises() {
-            const container = document.getElementById('exercise-list');
-            let html = '';
-            data.exercises.forEach((ex, i) => {
-                const cal = Math.round(ex.minutes * ex.calPerMin);
-                html += `
-                    <div class="flex justify-between items-center bg-orange-50 px-4 py-3 rounded-2xl">
-                        <div>${ex.name} • ${ex.minutes} min</div>
-                        <div class="flex items-center gap-4">
-                            <span class="font-medium">${cal} kcal</span>
-                            <button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
-            });
-            container.innerHTML = html || `<p class="text-slate-400 py-4">No exercises logged</p>`;
-        }
-
-        function calculateTotals() {
-            const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => sum + (data[m] || []).reduce((a, b) => a + b.cal, 0), 0);
-            const goal = data.goal || 2000;
-            document.getElementById('calories-consumed').textContent = intake + ' kcal';
-            document.getElementById('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
-            document.getElementById('progress-bar').style.width = Math.min((intake / goal) * 100, 100) + '%';
-        }
-
-        function renderFavoriteFoods() {
-            const container = document.getElementById('favorites-food-bar');
-            container.innerHTML = favoriteFoods.map((fav, i) => `
-                <button onclick="quickAddFavoriteFood(${i})" class="bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
-                    ❤️ ${fav.name} (${fav.cal})
-                </button>
-            `).join('') || '<p class="text-slate-400 text-sm">No favorite foods yet</p>';
-        }
-
-        function renderFavoriteExercises() {
-            const container = document.getElementById('favorites-exercise-bar');
-            container.innerHTML = favoriteExercises.map((fav, i) => `
-                <button onclick="quickAddFavoriteExercise(${i})" class="bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
-                    🏃 ${fav.name} • ${fav.minutes}min
-                </button>
-            `).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
-        }
-
-        function quickAddFavoriteFood(i) {
-            const fav = favoriteFoods[i];
-            const meal = prompt("Add to which meal?", "snacks");
-            if (!meal) return;
-            if (!data[meal]) data[meal] = [];
-            data[meal].push({name: fav.name, cal: fav.cal});
-            renderAll();
-            saveCurrentData();
-        }
-
-        function quickAddFavoriteExercise(i) {
-            const fav = favoriteExercises[i];
-            if (!data.exercises) data.exercises = [];
-            data.exercises.push({name: fav.name, minutes: fav.minutes, calPerMin: fav.calPerMin});
             renderAll();
             saveCurrentData();
         }
