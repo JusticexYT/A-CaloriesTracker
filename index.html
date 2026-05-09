@@ -16,6 +16,7 @@
         .calendar-day:hover { background-color: #ecfdf5; }
         .calendar-day.today { background-color: #a7f3d0; font-weight: 600; }
         .calendar-day.selected { background-color: #10b981; color: white; font-weight: 600; }
+        .tab-active { border-bottom: 3px solid #10b981; color: #10b981; font-weight: 600; }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -28,19 +29,33 @@
                 <h1 class="text-4xl font-bold">CalTrack</h1>
                 <p class="text-slate-500">For you & her ❤️</p>
             </div>
+
+            <!-- Improved Tabs -->
             <div class="flex border-b mb-6">
-                <button onclick="showLoginForm()" id="tab-login" class="flex-1 py-3 font-medium border-b-2 border-emerald-600 text-emerald-600">Login</button>
-                <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-3 font-medium text-slate-400">Sign Up</button>
+                <button onclick="showLoginForm()" id="tab-login" 
+                        class="tab-active flex-1 py-3 font-medium text-center">Login</button>
+                <button onclick="showSignupForm()" id="tab-signup" 
+                        class="flex-1 py-3 font-medium text-center text-slate-400">Sign Up</button>
             </div>
+
+            <!-- Login Form -->
             <div id="login-form">
-                <input id="login-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <input id="login-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <button onclick="login()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
+                <input id="login-username" type="text" placeholder="Username" 
+                       class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="login-password" type="password" placeholder="Password" 
+                       class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <button onclick="login()" 
+                        class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
             </div>
+
+            <!-- Signup Form -->
             <div id="signup-form" class="hidden">
-                <input id="signup-username" type="text" placeholder="Choose username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <input id="signup-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <button onclick="signup()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Create Account</button>
+                <input id="signup-username" type="text" placeholder="Choose username" 
+                       class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="signup-password" type="password" placeholder="Password" 
+                       class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <button onclick="signup()" 
+                        class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Create Account</button>
             </div>
         </div>
     </div>
@@ -577,10 +592,15 @@
         function showLoginForm() {
             document.getElementById('login-form').classList.remove('hidden');
             document.getElementById('signup-form').classList.add('hidden');
+            document.getElementById('tab-login').classList.add('tab-active');
+            document.getElementById('tab-signup').classList.remove('tab-active');
         }
+
         function showSignupForm() {
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('signup-form').classList.remove('hidden');
+            document.getElementById('tab-signup').classList.add('tab-active');
+            document.getElementById('tab-login').classList.remove('tab-active');
         }
 
         function signup() {
@@ -591,7 +611,7 @@
 
             users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [] };
             saveUsers();
-            alert("Account created! Please login.");
+            alert("Account created successfully! You can now login.");
             showLoginForm();
         }
 
@@ -614,6 +634,16 @@
                 document.getElementById('main-app').classList.add('hidden');
                 document.getElementById('login-screen').classList.remove('hidden');
             }
+        }
+
+        function renderAll() {
+            updateDateDisplay();
+            renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
+            renderExercises();
+            calculateTotals();
+            renderFavoriteFoods();
+            renderFavoriteExercises();
+            renderWater();
         }
 
         window.onload = () => {
