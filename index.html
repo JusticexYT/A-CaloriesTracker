@@ -3,43 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CalTrack • Daily Calorie Tracker</title>
+    <title>CalTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
+        body { 
+            font-family: 'Inter', system-ui, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); 
+        }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .meal-card:hover { transform: translateY(-4px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1); }
         .calendar-day { transition: all 0.2s; }
         .calendar-day:hover { background-color: #ecfdf5; }
         .calendar-day.today { background-color: #a7f3d0; font-weight: 600; }
         .calendar-day.selected { background-color: #10b981; color: white; font-weight: 600; }
-        .total-net { animation: pulse 2s infinite; }
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); } }
     </style>
 </head>
 <body class="min-h-screen pb-12">
 
     <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center">
-        <div class="max-w-md w-full mx-4 bg-white rounded-3xl shadow-xl p-8">
+    <div id="login-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
             <div class="text-center mb-8">
                 <div class="w-16 h-16 mx-auto bg-emerald-600 rounded-3xl flex items-center justify-center text-white text-4xl mb-4">🍎</div>
                 <h1 class="text-4xl font-bold">CalTrack</h1>
-                <p class="text-slate-500">Your personal calorie journal</p>
+                <p class="text-slate-500">For you & her ❤️</p>
             </div>
-
             <div class="flex border-b mb-6">
                 <button onclick="showLoginForm()" id="tab-login" class="flex-1 py-3 font-medium border-b-2 border-emerald-600 text-emerald-600">Login</button>
                 <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-3 font-medium text-slate-400">Sign Up</button>
             </div>
-
             <div id="login-form">
                 <input id="login-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
                 <input id="login-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
                 <button onclick="login()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
             </div>
-
             <div id="signup-form" class="hidden">
                 <input id="signup-username" type="text" placeholder="Choose username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
                 <input id="signup-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
@@ -48,28 +45,33 @@
         </div>
     </div>
 
+    <!-- Storage Warning -->
+    <div id="storage-warning" class="hidden fixed top-4 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-400 text-amber-800 px-6 py-3 rounded-2xl text-sm z-[100] shadow-lg">
+        ⚠️ Data saving is limited in this browser. Try opening in Chrome/Safari for full saving.
+    </div>
+
     <!-- Main App -->
-    <div id="main-app" class="hidden max-w-6xl mx-auto px-4 py-8">
-        <div class="flex justify-between items-center mb-8">
+    <div id="main-app" class="hidden max-w-6xl mx-auto px-4 py-6">
+        <div class="flex justify-between items-center mb-6">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-emerald-600 rounded-2xl flex items-center justify-center text-white text-3xl">🍎</div>
                 <div>
-                    <h1 class="text-4xl font-bold">CalTrack</h1>
-                    <p>Welcome, <span id="current-user-display" class="font-medium"></span></p>
+                    <h1 class="text-3xl font-bold">CalTrack</h1>
+                    <p class="text-sm text-slate-500">Welcome, <span id="current-user-display" class="font-medium"></span></p>
                 </div>
             </div>
-            <div class="flex gap-3">
-                <button onclick="logout()" class="px-5 py-2 bg-white border rounded-2xl hover:bg-slate-50">Logout</button>
-                <button onclick="goToToday()" class="px-5 py-2 bg-emerald-600 text-white rounded-2xl hover:bg-emerald-700">Today</button>
+            <div class="flex gap-2">
+                <button onclick="goToToday()" class="px-5 py-2 bg-emerald-600 text-white rounded-2xl text-sm font-medium">Today</button>
+                <button onclick="logout()" class="px-5 py-2 bg-white border rounded-2xl text-sm font-medium">Logout</button>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <!-- Calendar -->
-            <div class="lg:col-span-3 bg-white rounded-3xl shadow-sm p-6">
+            <div class="lg:col-span-3 bg-white rounded-3xl shadow-sm p-5">
                 <div class="flex justify-between mb-4">
                     <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="calendar-title" class="font-semibold text-xl"></h3>
+                    <h3 id="calendar-title" class="font-semibold text-lg"></h3>
                     <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
                 <div class="grid grid-cols-7 text-center text-xs text-slate-500 mb-2">
@@ -78,20 +80,25 @@
                 <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
             </div>
 
-            <!-- Main Tracking Area -->
-            <div class="lg:col-span-9">
-                <h2 id="selected-date-display" class="text-3xl font-semibold mb-1"></h2>
-                <p id="day-name" class="text-slate-500 mb-6"></p>
+            <!-- Main Content -->
+            <div class="lg:col-span-9 space-y-6">
+                <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
+                <p id="day-name" class="text-slate-500"></p>
+
+                <!-- Favorites -->
+                <div class="bg-white rounded-3xl p-5">
+                    <h3 class="font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> Favorite Foods</h3>
+                    <div id="favorites-bar" class="flex gap-2 overflow-x-auto pb-2"></div>
+                </div>
 
                 <!-- Goal -->
-                <div class="bg-white rounded-3xl p-6 mb-8">
+                <div class="bg-white rounded-3xl p-6">
                     <div class="flex justify-between mb-3">
                         <span class="font-medium">Daily Goal</span>
-                        <input id="goal-input" type="number" value="2000" oninput="updateGoal()" 
-                               class="w-24 text-right font-mono text-xl focus:outline-none">
+                        <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none">
                     </div>
                     <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
-                        <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all" style="width: 0%"></div>
+                        <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all"></div>
                     </div>
                     <div class="flex justify-between text-sm mt-2">
                         <span id="calories-consumed">0 kcal</span>
@@ -100,49 +107,49 @@
                 </div>
 
                 <!-- Meals -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-amber-50 px-6 py-4 flex justify-between items-center">
+                        <div class="bg-amber-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
                             <div class="flex items-center gap-3">
                                 <span class="text-3xl">☀️</span>
                                 <div><strong>Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div>
                             </div>
-                            <button onclick="showAddModal('breakfast')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="showAddModal('breakfast')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
                         </div>
-                        <div id="breakfast-list" class="p-6 space-y-3"></div>
+                        <div id="breakfast-list" class="p-5 space-y-3 min-h-[100px]"></div>
                     </div>
 
                     <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-blue-50 px-6 py-4 flex justify-between items-center">
+                        <div class="bg-blue-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
                             <div class="flex items-center gap-3">
                                 <span class="text-3xl">🍲</span>
                                 <div><strong>Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div>
                             </div>
-                            <button onclick="showAddModal('lunch')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="showAddModal('lunch')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
                         </div>
-                        <div id="lunch-list" class="p-6 space-y-3"></div>
+                        <div id="lunch-list" class="p-5 space-y-3 min-h-[100px]"></div>
                     </div>
 
                     <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-indigo-50 px-6 py-4 flex justify-between items-center">
+                        <div class="bg-indigo-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
                             <div class="flex items-center gap-3">
                                 <span class="text-3xl">🌙</span>
                                 <div><strong>Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div>
                             </div>
-                            <button onclick="showAddModal('dinner')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="showAddModal('dinner')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
                         </div>
-                        <div id="dinner-list" class="p-6 space-y-3"></div>
+                        <div id="dinner-list" class="p-5 space-y-3 min-h-[100px]"></div>
                     </div>
 
                     <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-pink-50 px-6 py-4 flex justify-between items-center">
+                        <div class="bg-pink-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
                             <div class="flex items-center gap-3">
                                 <span class="text-3xl">🍪</span>
                                 <div><strong>Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div>
                             </div>
-                            <button onclick="showAddModal('snacks')" class="p-3 bg-white rounded-2xl shadow"><i class="fa-solid fa-plus"></i></button>
+                            <button onclick="showAddModal('snacks')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
                         </div>
-                        <div id="snacks-list" class="p-6 space-y-3"></div>
+                        <div id="snacks-list" class="p-5 space-y-3 min-h-[100px]"></div>
                     </div>
                 </div>
 
@@ -159,36 +166,44 @@
     </div>
 
     <!-- Add Food Modal -->
-    <div id="add-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl w-full max-w-md p-6">
-            <h3 class="text-xl font-semibold mb-4">Add Food</h3>
-            <select id="meal-type" class="w-full mb-4 p-3 border rounded-2xl">
-                <option value="breakfast">Breakfast</option>
-                <option value="lunch">Lunch</option>
-                <option value="dinner">Dinner</option>
-                <option value="snacks">Snacks</option>
-            </select>
-            <input id="food-name" type="text" placeholder="Food name" class="w-full mb-4 p-4 border rounded-2xl">
-            <input id="food-calories" type="number" placeholder="Calories" class="w-full mb-6 p-4 border rounded-2xl">
-            <div class="flex gap-3">
-                <button onclick="hideModal()" class="flex-1 py-4 border rounded-2xl">Cancel</button>
-                <button onclick="addFood()" class="flex-1 py-4 bg-emerald-600 text-white rounded-2xl">Add</button>
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4">Add Food</h3>
+                <select id="meal-type" class="w-full mb-4 p-4 border rounded-2xl">
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="snacks">Snacks</option>
+                </select>
+                <input id="food-name" type="text" placeholder="Food name" class="w-full mb-4 p-4 border rounded-2xl">
+                <input id="food-calories" type="number" placeholder="Calories" class="w-full mb-4 p-4 border rounded-2xl">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="favorite-checkbox" class="w-5 h-5 accent-red-500">
+                    <span class="text-sm">Add to Favorites ❤️</span>
+                </label>
+            </div>
+            <div class="flex border-t">
+                <button onclick="hideModal()" class="flex-1 py-5 text-slate-500 font-medium">Cancel</button>
+                <button onclick="addFood()" class="flex-1 py-5 bg-emerald-600 text-white font-semibold rounded-br-3xl">Add</button>
             </div>
         </div>
     </div>
 
     <!-- Exercise Modal -->
-    <div id="exercise-modal" class="hidden fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div class="bg-white rounded-3xl w-full max-w-md p-6">
-            <h3 class="text-xl font-semibold mb-4">Log Exercise</h3>
-            <input id="exercise-name" type="text" placeholder="Activity (e.g. Running)" class="w-full mb-4 p-4 border rounded-2xl">
-            <div class="grid grid-cols-2 gap-4">
-                <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border rounded-2xl">
-                <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border rounded-2xl">
+    <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4">Log Exercise</h3>
+                <input id="exercise-name" type="text" placeholder="Activity" class="w-full mb-4 p-4 border rounded-2xl">
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border rounded-2xl">
+                    <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border rounded-2xl">
+                </div>
             </div>
-            <div class="flex gap-3 mt-6">
-                <button onclick="hideExerciseModal()" class="flex-1 py-4 border rounded-2xl">Cancel</button>
-                <button onclick="addExercise()" class="flex-1 py-4 bg-orange-600 text-white rounded-2xl">Save</button>
+            <div class="flex border-t">
+                <button onclick="hideExerciseModal()" class="flex-1 py-5 text-slate-500 font-medium">Cancel</button>
+                <button onclick="addExercise()" class="flex-1 py-5 bg-orange-600 text-white font-semibold rounded-br-3xl">Save</button>
             </div>
         </div>
     </div>
@@ -199,14 +214,41 @@
         let currentDate = new Date().toISOString().split('T')[0];
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
-
         let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
+        let favorites = [];
+        let storageAvailable = true;
 
-        function loadUsers() { const s = localStorage.getItem('caltrack_users'); if(s) users = JSON.parse(s); }
-        function saveUsers() { localStorage.setItem('caltrack_users', JSON.stringify(users)); }
+        function safeGet(key) {
+            try {
+                const item = localStorage.getItem(key);
+                return item ? JSON.parse(item) : null;
+            } catch(e) {
+                storageAvailable = false;
+                document.getElementById('storage-warning').classList.remove('hidden');
+                return null;
+            }
+        }
+
+        function safeSet(key, value) {
+            try {
+                localStorage.setItem(key, JSON.stringify(value));
+            } catch(e) {
+                storageAvailable = false;
+                document.getElementById('storage-warning').classList.remove('hidden');
+            }
+        }
+
+        function loadUsers() {
+            const saved = safeGet('caltrack_users');
+            if (saved) users = saved;
+        }
+
+        function saveUsers() {
+            if (storageAvailable) safeSet('caltrack_users', users);
+        }
 
         function getDateData(date) {
-            if (!users[currentUser]) users[currentUser] = { history: {} };
+            if (!users[currentUser]) users[currentUser] = { history: {}, favorites: [] };
             if (!users[currentUser].history[date]) {
                 users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [] };
             }
@@ -215,12 +257,20 @@
 
         function loadCurrentData() {
             data = getDateData(currentDate);
+            favorites = users[currentUser]?.favorites || [];
             document.getElementById('goal-input').value = data.goal || 2000;
         }
 
         function saveCurrentData() {
             if (currentUser) {
                 users[currentUser].history[currentDate] = data;
+                saveUsers();
+            }
+        }
+
+        function saveFavorites() {
+            if (currentUser) {
+                users[currentUser].favorites = favorites;
                 saveUsers();
             }
         }
@@ -269,28 +319,43 @@
         function updateDateDisplay() {
             const d = new Date(currentDate);
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
-            document.getElementById('day-name').textContent = '';
+        }
+
+        function renderFavorites() {
+            const container = document.getElementById('favorites-bar');
+            container.innerHTML = favorites.map((fav, i) => `
+                <button onclick="quickAddFavorite(${i})" class="bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex-shrink-0">
+                    ❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span>
+                </button>
+            `).join('') || '<p class="text-slate-400 text-sm py-2">No favorites yet. Mark foods ❤️</p>';
+        }
+
+        function quickAddFavorite(index) {
+            const fav = favorites[index];
+            const meal = prompt("Add to which meal? (breakfast, lunch, dinner, snacks)", "snacks");
+            if (!meal) return;
+            if (!data[meal]) data[meal] = [];
+            data[meal].push({name: fav.name, cal: fav.cal});
+            renderAll();
+            saveCurrentData();
         }
 
         function renderMeal(meal) {
             const list = document.getElementById(meal + '-list');
             const totalEl = document.getElementById(meal + '-total');
             const items = data[meal] || [];
-            let html = '';
+            let html = items.length === 0 ? `<p class="text-slate-400 text-center py-8">No items yet</p>` : '';
 
-            if (items.length === 0) html = `<p class="text-slate-400 text-center py-6">No items added</p>`;
-            else {
-                items.forEach((item, i) => {
-                    html += `
-                        <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
-                            <div>
-                                <div>${item.name}</div>
-                                <div class="text-xs text-slate-400">${item.cal} kcal</div>
-                            </div>
-                            <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
-                        </div>`;
-                });
-            }
+            items.forEach((item, i) => {
+                html += `
+                    <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
+                        <div>
+                            <div class="font-medium">${item.name}</div>
+                            <div class="text-xs text-slate-400">${item.cal} kcal</div>
+                        </div>
+                        <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
+            });
             list.innerHTML = html;
             totalEl.textContent = items.reduce((sum, it) => sum + it.cal, 0) + ' kcal';
         }
@@ -313,17 +378,11 @@
         }
 
         function calculateTotals() {
-            const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => {
-                return sum + (data[m] || []).reduce((a, b) => a + b.cal, 0);
-            }, 0);
-
-            const burned = data.exercises.reduce((sum, ex) => sum + Math.round(ex.minutes * ex.calPerMin), 0);
-
+            const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => sum + (data[m] || []).reduce((a, b) => a + b.cal, 0), 0);
+            const goal = data.goal || 2000;
             document.getElementById('calories-consumed').textContent = intake + ' kcal';
-            document.getElementById('remaining-calories').textContent = Math.max((data.goal - intake), 0) + ' remaining';
-
-            const progress = Math.min((intake / data.goal) * 100, 100);
-            document.getElementById('progress-bar').style.width = progress + '%';
+            document.getElementById('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
+            document.getElementById('progress-bar').style.width = Math.min((intake / goal) * 100, 100) + '%';
         }
 
         function renderAll() {
@@ -331,24 +390,33 @@
             renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
             renderExercises();
             calculateTotals();
+            renderFavorites();
         }
 
-        // Food & Exercise functions
         let currentMealType = 'breakfast';
         function showAddModal(meal) {
             currentMealType = meal;
+            document.getElementById('food-name').value = '';
+            document.getElementById('food-calories').value = '';
+            document.getElementById('favorite-checkbox').checked = false;
             document.getElementById('add-modal').classList.remove('hidden');
-            document.getElementById('food-name').focus();
         }
         function hideModal() { document.getElementById('add-modal').classList.add('hidden'); }
 
         function addFood() {
             const name = document.getElementById('food-name').value.trim();
             const cal = parseInt(document.getElementById('food-calories').value);
-            if (!name || !cal) return alert("Enter name and calories");
+            const isFavorite = document.getElementById('favorite-checkbox').checked;
+
+            if (!name || !cal) return alert("Please enter food name and calories");
 
             if (!data[currentMealType]) data[currentMealType] = [];
             data[currentMealType].push({name, cal});
+
+            if (isFavorite) {
+                favorites.push({name, cal});
+                saveFavorites();
+            }
 
             hideModal();
             renderAll();
@@ -363,18 +431,15 @@
             }
         }
 
-        function showExerciseModal() {
-            document.getElementById('exercise-modal').classList.remove('hidden');
-        }
+        function showExerciseModal() { document.getElementById('exercise-modal').classList.remove('hidden'); }
         function hideExerciseModal() { document.getElementById('exercise-modal').classList.add('hidden'); }
 
         function addExercise() {
             const name = document.getElementById('exercise-name').value.trim();
             const minutes = parseFloat(document.getElementById('exercise-minutes').value);
             const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
-
-            if (!name || !minutes || !calPerMin) return alert("Fill all fields");
-
+            if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
+            
             data.exercises.push({name, minutes, calPerMin});
             hideExerciseModal();
             renderAll();
@@ -382,7 +447,7 @@
         }
 
         function removeExercise(i) {
-            if (confirm("Delete exercise?")) {
+            if (confirm("Delete this exercise?")) {
                 data.exercises.splice(i, 1);
                 renderAll();
                 saveCurrentData();
@@ -395,7 +460,6 @@
             saveCurrentData();
         }
 
-        // Login / Signup
         function showLoginForm() {
             document.getElementById('login-form').classList.remove('hidden');
             document.getElementById('signup-form').classList.add('hidden');
@@ -411,7 +475,7 @@
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
 
-            users[user] = { password: pass, history: {} };
+            users[user] = { password: pass, history: {}, favorites: [] };
             saveUsers();
             alert("Account created! Please login.");
             showLoginForm();
@@ -420,7 +484,6 @@
         function login() {
             const user = document.getElementById('login-username').value.trim().toLowerCase();
             const pass = document.getElementById('login-password').value;
-
             if (!users[user] || users[user].password !== pass) return alert("Invalid username or password");
 
             currentUser = user;
@@ -443,7 +506,6 @@
 
         window.onload = () => {
             loadUsers();
-            // Auto show login screen
         };
     </script>
 </body>
