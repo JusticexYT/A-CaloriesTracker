@@ -2,34 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CalTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>tailwind.config = { content: [] };</script>
+    <script>
+        tailwind.config = { content: [] };
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
-        body { font-family: 'Inter', system-ui, sans-serif; background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); }
+        body { font-family: 'Inter', system-ui, sans-serif; }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .calendar-day { transition: all 0.2s; }
         .calendar-day:hover { background-color: #ecfdf5; }
         .calendar-day.today { background-color: #a7f3d0; font-weight: 600; }
         .calendar-day.selected { background-color: #10b981; color: white; font-weight: 600; }
         .tab-active { border-bottom: 3px solid #10b981; color: #10b981; font-weight: 600; }
+        .avatar { width: 42px; height: 42px; object-fit: cover; border-radius: 9999px; border: 2px solid white; }
+        .favorites-scroll { scrollbar-width: none; }
+        .favorites-scroll::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="min-h-screen pb-12">
+<body class="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 pb-20">
 
     <!-- Login Screen -->
     <div id="login-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center p-4">
-        <div class="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+        <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8">
             <div class="text-center mb-8">
-                <div class="w-16 h-16 mx-auto bg-emerald-600 rounded-3xl flex items-center justify-center text-white text-4xl mb-4">🍎</div>
+                <div class="w-20 h-20 mx-auto bg-emerald-600 rounded-3xl flex items-center justify-center text-white text-5xl mb-4">🍎</div>
                 <h1 class="text-4xl font-bold">CalTrack</h1>
                 <p class="text-slate-500">For you & her ❤️</p>
             </div>
             <div class="flex border-b mb-6">
-                <button onclick="showLoginForm()" id="tab-login" class="tab-active flex-1 py-3 font-medium text-center">Login</button>
-                <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-3 font-medium text-center text-slate-400">Sign Up</button>
+                <button onclick="showLoginForm()" id="tab-login" class="tab-active flex-1 py-4 font-medium">Login</button>
+                <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-4 font-medium text-slate-400">Sign Up</button>
             </div>
             <div id="login-form">
                 <input id="login-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
@@ -44,140 +49,145 @@
         </div>
     </div>
 
-    <div id="storage-warning" class="hidden fixed top-4 left-1/2 -translate-x-1/2 bg-amber-100 border border-amber-400 text-amber-800 px-6 py-3 rounded-2xl text-sm z-[100]">
-        ⚠️ Limited saving in this browser
-    </div>
-
     <!-- Main App -->
-    <div id="main-app" class="hidden max-w-6xl mx-auto px-4 py-6">
-        <div class="flex justify-between items-center mb-6">
-            <div class="flex items-center gap-3">
-                <div id="header-avatar" onclick="showProfileModal()" 
-                     class="w-11 h-11 bg-emerald-600 rounded-2xl flex items-center justify-center text-3xl cursor-pointer shadow hover:scale-110 transition">
+    <div id="main-app" class="hidden">
+        <div class="sticky top-0 bg-white border-b z-50 px-4 py-4">
+            <div class="max-w-6xl mx-auto flex justify-between items-center">
+                <div onclick="showProfileModal()" class="flex items-center gap-3 cursor-pointer">
+                    <img id="header-avatar" src="https://via.placeholder.com/42" class="avatar" alt="Profile">
+                    <div>
+                        <h1 class="text-2xl font-bold">CalTrack</h1>
+                        <p class="text-sm text-slate-500">Hi, <span id="current-user-display" class="font-medium"></span></p>
+                    </div>
                 </div>
-                <div>
-                    <h1 class="text-3xl font-bold">CalTrack</h1>
-                    <p class="text-sm text-slate-500">Welcome, <span id="current-user-display" class="font-medium"></span></p>
+                <div class="flex gap-2">
+                    <button onclick="goToToday()" class="px-5 py-2.5 bg-emerald-600 text-white rounded-2xl text-sm font-medium">Today</button>
+                    <button onclick="logout()" class="px-5 py-2.5 border rounded-2xl text-sm font-medium">Logout</button>
                 </div>
-            </div>
-            <div class="flex gap-2">
-                <button onclick="goToToday()" class="px-5 py-2 bg-emerald-600 text-white rounded-2xl text-sm font-medium">Today</button>
-                <button onclick="logout()" class="px-5 py-2 bg-white border rounded-2xl text-sm font-medium">Logout</button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            <!-- Calendar -->
-            <div class="lg:col-span-3 bg-white rounded-3xl shadow-sm p-5">
+        <div class="max-w-6xl mx-auto px-4 pt-6">
+            <!-- Mobile Calendar -->
+            <div class="lg:hidden bg-white rounded-3xl shadow-sm p-5 mb-6">
                 <div class="flex justify-between mb-4">
                     <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="calendar-title" class="font-semibold text-lg"></h3>
+                    <h3 id="calendar-title-mobile" class="font-semibold text-lg"></h3>
                     <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
                 <div class="grid grid-cols-7 text-center text-xs text-slate-500 mb-2">
                     <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
                 </div>
-                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
+                <div id="calendar-grid-mobile" class="grid grid-cols-7 gap-1 text-center"></div>
             </div>
 
-            <!-- Main Content -->
-            <div class="lg:col-span-9 space-y-6">
-                <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
-                <p id="day-name" class="text-slate-500"></p>
-
-                <!-- Barcode Scanner -->
-                <button onclick="startBarcodeScanner()" class="w-full py-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3">
-                    <i class="fa-solid fa-barcode text-2xl"></i> Scan Barcode (Packaged Food)
-                </button>
-
-                <!-- Water Intake -->
-                <div class="bg-white rounded-3xl shadow-sm p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-semibold text-lg flex items-center gap-2"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
-                        <div class="text-sm font-mono font-medium" id="water-total">0 / 3000 ml</div>
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Desktop Calendar -->
+                <div class="hidden lg:block lg:col-span-3 bg-white rounded-3xl shadow-sm p-5">
+                    <div class="flex justify-between mb-4">
+                        <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h3 id="calendar-title" class="font-semibold text-lg"></h3>
+                        <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
-                    <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
-                        <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
+                    <div class="grid grid-cols-7 text-center text-xs text-slate-500 mb-2">
+                        <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
                     </div>
-                    <div class="grid grid-cols-4 gap-3 mb-5">
-                        <button onclick="addWater(250)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250ml</button>
-                        <button onclick="addWater(500)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+500ml</button>
-                        <button onclick="addWater(750)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+750ml</button>
-                        <button onclick="addWater(1000)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1L</button>
-                    </div>
-                    <div class="flex gap-3 mb-6">
-                        <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-4 py-3 border rounded-2xl focus:outline-none">
-                        <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl font-medium">Add</button>
-                    </div>
-                    <div id="water-entries" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
                 </div>
 
-                <!-- Favorites -->
-                <div class="bg-white rounded-3xl p-5 space-y-6">
-                    <div>
-                        <h3 class="font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-heart text-red-500"></i> Favorite Foods</h3>
-                        <div id="favorites-food-bar" class="flex gap-2 overflow-x-auto pb-2"></div>
-                    </div>
-                    <div>
-                        <h3 class="font-medium mb-3 flex items-center gap-2"><i class="fa-solid fa-heart text-orange-500"></i> Favorite Exercises</h3>
-                        <div id="favorites-exercise-bar" class="flex gap-2 overflow-x-auto pb-2"></div>
-                    </div>
-                </div>
+                <!-- Main Content -->
+                <div class="lg:col-span-9 space-y-6">
+                    <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
 
-                <!-- Calorie Goal -->
-                <div class="bg-white rounded-3xl p-6">
-                    <div class="flex justify-between mb-3">
-                        <span class="font-medium">Daily Calorie Goal</span>
-                        <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none">
-                    </div>
-                    <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
-                        <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all"></div>
-                    </div>
-                    <div class="flex justify-between text-sm mt-2">
-                        <span id="calories-consumed">0 kcal</span>
-                        <span id="remaining-calories">2000 remaining</span>
-                    </div>
-                </div>
+                    <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3 text-lg">
+                        <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
+                    </button>
 
-                <!-- Meals -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-amber-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                            <div class="flex items-center gap-3"><span class="text-3xl">☀️</span><div><strong>Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div></div>
-                            <button onclick="showAddModal('breakfast')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                    <!-- Water Intake -->
+                    <div class="bg-white rounded-3xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-semibold text-lg flex items-center gap-2"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
+                            <div class="text-sm font-mono font-medium" id="water-total">0 / 3000 ml</div>
                         </div>
-                        <div id="breakfast-list" class="p-5 space-y-3 min-h-[100px]"></div>
-                    </div>
-                    <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-blue-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                            <div class="flex items-center gap-3"><span class="text-3xl">🍲</span><div><strong>Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div></div>
-                            <button onclick="showAddModal('lunch')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                        <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
+                            <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
                         </div>
-                        <div id="lunch-list" class="p-5 space-y-3 min-h-[100px]"></div>
-                    </div>
-                    <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-indigo-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                            <div class="flex items-center gap-3"><span class="text-3xl">🌙</span><div><strong>Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div></div>
-                            <button onclick="showAddModal('dinner')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                        <div class="grid grid-cols-4 gap-3 mb-5">
+                            <button onclick="addWater(250)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250</button>
+                            <button onclick="addWater(500)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+500</button>
+                            <button onclick="addWater(750)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+750</button>
+                            <button onclick="addWater(1000)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1000</button>
                         </div>
-                        <div id="dinner-list" class="p-5 space-y-3 min-h-[100px]"></div>
-                    </div>
-                    <div class="meal-card bg-white rounded-3xl shadow-sm">
-                        <div class="bg-pink-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                            <div class="flex items-center gap-3"><span class="text-3xl">🍪</span><div><strong>Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div></div>
-                            <button onclick="showAddModal('snacks')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                        <div class="flex gap-3">
+                            <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-5 py-4 border rounded-2xl focus:outline-none">
+                            <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl">Add</button>
                         </div>
-                        <div id="snacks-list" class="p-5 space-y-3 min-h-[100px]"></div>
+                        <div id="water-entries" class="mt-6 space-y-3 max-h-60 overflow-y-auto"></div>
                     </div>
-                </div>
 
-                <!-- Exercise -->
-                <div class="bg-white rounded-3xl shadow-sm p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <strong class="text-lg">Exercise</strong>
-                        <button onclick="showExerciseModal()" class="px-5 py-2 bg-orange-100 text-orange-700 rounded-2xl text-sm font-medium">+ Add Exercise</button>
+                    <!-- Favorites -->
+                    <div class="bg-white rounded-3xl p-6">
+                        <h3 class="font-medium mb-4">❤️ Favorite Foods</h3>
+                        <div id="favorites-food-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
+                        <h3 class="font-medium mt-8 mb-4">🏃 Favorite Exercises</h3>
+                        <div id="favorites-exercise-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
                     </div>
-                    <div id="exercise-list" class="space-y-3"></div>
+
+                    <!-- Goal -->
+                    <div class="bg-white rounded-3xl p-6">
+                        <div class="flex justify-between mb-3">
+                            <span class="font-medium">Daily Calorie Goal</span>
+                            <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none">
+                        </div>
+                        <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
+                            <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all"></div>
+                        </div>
+                        <div class="flex justify-between text-sm mt-2">
+                            <span id="calories-consumed">0 kcal</span>
+                            <span id="remaining-calories">2000 remaining</span>
+                        </div>
+                    </div>
+
+                    <!-- Meals -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="meal-card bg-white rounded-3xl shadow-sm">
+                            <div class="bg-amber-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">☀️</span><div><strong>Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('breakfast')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                            </div>
+                            <div id="breakfast-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                        </div>
+                        <div class="meal-card bg-white rounded-3xl shadow-sm">
+                            <div class="bg-blue-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">🍲</span><div><strong>Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('lunch')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                            </div>
+                            <div id="lunch-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                        </div>
+                        <div class="meal-card bg-white rounded-3xl shadow-sm">
+                            <div class="bg-indigo-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">🌙</span><div><strong>Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('dinner')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                            </div>
+                            <div id="dinner-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                        </div>
+                        <div class="meal-card bg-white rounded-3xl shadow-sm">
+                            <div class="bg-pink-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">🍪</span><div><strong>Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('snacks')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                            </div>
+                            <div id="snacks-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                        </div>
+                    </div>
+
+                    <!-- Exercise -->
+                    <div class="bg-white rounded-3xl shadow-sm p-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <strong class="text-lg">Exercise</strong>
+                            <button onclick="showExerciseModal()" class="px-6 py-2.5 bg-orange-100 text-orange-700 rounded-2xl text-sm font-medium">+ Add Exercise</button>
+                        </div>
+                        <div id="exercise-list" class="space-y-3"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -186,32 +196,35 @@
     <!-- Profile Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
-            <div class="p-6">
-                <h3 class="text-2xl font-semibold mb-6 text-center">Customize Profile</h3>
-                <div class="flex justify-center gap-6 mb-8" id="avatar-picker"></div>
-                <input id="profile-display-name" type="text" placeholder="Display Name" class="w-full mb-5 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <div>
-                    <label class="block text-sm text-slate-500 mb-2">Daily Water Goal (ml)</label>
-                    <input id="profile-water-goal" type="number" value="3000" class="w-full px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+            <div class="p-8">
+                <h3 class="text-2xl font-bold text-center mb-6">Profile Settings</h3>
+                <div class="flex flex-col items-center">
+                    <img id="profile-avatar" src="https://via.placeholder.com/120" class="w-32 h-32 rounded-full object-cover border-4 border-emerald-200 mb-6">
+                    <label class="cursor-pointer bg-emerald-100 hover:bg-emerald-200 px-6 py-3 rounded-2xl text-emerald-700 font-medium flex items-center gap-2">
+                        📷 Change Photo
+                        <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="uploadProfilePicture(event)">
+                    </label>
                 </div>
-            </div>
-            <div class="flex border-t">
-                <button onclick="hideProfileModal()" class="flex-1 py-5 text-slate-500 font-medium">Cancel</button>
-                <button onclick="saveProfile()" class="flex-1 py-5 bg-emerald-600 text-white font-semibold rounded-br-3xl">Save Changes</button>
+                <input id="profile-name" type="text" class="w-full mt-8 px-5 py-4 border rounded-2xl text-center text-lg" placeholder="Display Name">
+                <div class="grid grid-cols-2 gap-4 mt-8">
+                    <button onclick="hideProfileModal()" class="py-4 border rounded-2xl font-medium">Cancel</button>
+                    <button onclick="saveProfile()" class="py-4 bg-emerald-600 text-white rounded-2xl font-semibold">Save Changes</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Barcode, Food, Exercise Modals (unchanged) -->
-    <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[100] flex flex-col">
-        <div class="p-4 flex justify-between items-center text-white bg-black">
+    <!-- Barcode Modal -->
+    <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[200] flex flex-col">
+        <div class="p-4 flex justify-between text-white">
             <h3 class="font-semibold">Scan Barcode</h3>
             <button onclick="stopBarcodeScanner()" class="text-3xl">✕</button>
         </div>
-        <video id="video" class="flex-1 w-full object-cover bg-black"></video>
-        <div id="scan-status" class="p-4 text-center text-white bg-black text-sm">Point camera at barcode...</div>
+        <video id="video" class="flex-1 bg-black"></video>
+        <div id="scan-status" class="p-4 text-white text-center">Point camera at barcode...</div>
     </div>
 
+    <!-- Food Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -236,6 +249,7 @@
         </div>
     </div>
 
+    <!-- Exercise Modal -->
     <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -267,24 +281,31 @@
         let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
         let favoriteFoods = [];
         let favoriteExercises = [];
-        let userProfile = { avatar: '🍎', displayName: '', waterGoal: 3000 };
         let storageAvailable = true;
         let videoStream = null;
+        let currentProfile = { name: '', picture: '' };
+
+        const dailyWaterGoal = 3000;
 
         function safeGet(key) {
-            try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; }
-            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); return null; }
+            try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } 
+            catch(e) { storageAvailable = false; return null; }
         }
         function safeSet(key, value) {
-            try { localStorage.setItem(key, JSON.stringify(value)); }
-            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); }
+            try { localStorage.setItem(key, JSON.stringify(value)); } 
+            catch(e) { storageAvailable = false; }
         }
 
-        function loadUsers() { const saved = safeGet('caltrack_users'); if(saved) users = saved; }
-        function saveUsers() { if(storageAvailable) safeSet('caltrack_users', users); }
+        function loadUsers() { 
+            const saved = safeGet('caltrack_users'); 
+            if(saved) users = saved; 
+        }
+        function saveUsers() { 
+            if(storageAvailable) safeSet('caltrack_users', users); 
+        }
 
         function getDateData(date) {
-            if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: userProfile };
+            if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: currentUser, picture: '' } };
             if (!users[currentUser].history[date]) {
                 users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
             }
@@ -313,11 +334,15 @@
             }
         }
 
-        // Profile Functions
+        function loadProfile() {
+            currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '' };
+            document.getElementById('current-user-display').textContent = currentProfile.name;
+            document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
+        }
+
         function showProfileModal() {
-            document.getElementById('profile-display-name').value = userProfile.displayName || currentUser;
-            document.getElementById('profile-water-goal').value = userProfile.waterGoal || 3000;
-            renderAvatarPicker();
+            document.getElementById('profile-name').value = currentProfile.name;
+            document.getElementById('profile-avatar').src = currentProfile.picture || 'https://via.placeholder.com/120';
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
@@ -325,51 +350,38 @@
             document.getElementById('profile-modal').classList.add('hidden');
         }
 
-        function renderAvatarPicker() {
-            const avatars = ['🍎','🥑','🍓','🥦','🏋️','🏃‍♀️','🧘','🌟','🐼','🦋','🍌','🥕'];
-            let html = '';
-            avatars.forEach(av => {
-                html += `<button onclick="selectAvatar('${av}')" class="text-5xl p-4 hover:scale-125 transition ${userProfile.avatar === av ? 'ring-4 ring-emerald-500 rounded-3xl' : ''}">${av}</button>`;
-            });
-            document.getElementById('avatar-picker').innerHTML = html;
-        }
-
-        function selectAvatar(av) {
-            userProfile.avatar = av;
-            renderAvatarPicker();
+        function uploadProfilePicture(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(ev) {
+                document.getElementById('profile-avatar').src = ev.target.result;
+                currentProfile.picture = ev.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function saveProfile() {
-            userProfile.displayName = document.getElementById('profile-display-name').value.trim() || currentUser;
-            userProfile.waterGoal = parseInt(document.getElementById('profile-water-goal').value) || 3000;
-
-            if (currentUser && users[currentUser]) {
-                users[currentUser].profile = userProfile;
-                saveUsers();
-            }
-            updateHeaderProfile();
+            const newName = document.getElementById('profile-name').value.trim();
+            if (newName) currentProfile.name = newName;
+            if (users[currentUser]) users[currentUser].profile = currentProfile;
+            saveUsers();
+            loadProfile();
             hideProfileModal();
-            renderWater();
+            alert("Profile updated successfully!");
         }
 
-        function updateHeaderProfile() {
-            document.getElementById('header-avatar').innerHTML = userProfile.avatar;
-            document.getElementById('current-user-display').textContent = userProfile.displayName || currentUser;
-        }
-
-        function getDailyWaterGoal() {
-            return userProfile.waterGoal || 3000;
-        }
-
-        // Calendar & Render Functions (same as your code)
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
             document.getElementById('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const todayStr = new Date().toISOString().split('T')[0];
+
             for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
+
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const div = document.createElement('div');
@@ -404,17 +416,18 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
-        // Water (with custom goal)
         function addWater(ml) {
             if (!data.waterEntries) data.waterEntries = [];
             data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
             renderWater();
             saveCurrentData();
         }
+
         function addWaterManual() {
             const ml = parseInt(document.getElementById('water-manual').value);
             if (ml > 0) addWater(ml);
         }
+
         function removeWater(index) {
             if (confirm("Remove this water entry?")) {
                 data.waterEntries.splice(index, 1);
@@ -422,11 +435,11 @@
                 saveCurrentData();
             }
         }
+
         function renderWater() {
             const total = (data.waterEntries || []).reduce((sum, e) => sum + e.amount, 0);
-            const goal = getDailyWaterGoal();
-            document.getElementById('water-total').textContent = `${total} / ${goal} ml`;
-            const percent = Math.min((total / goal) * 100, 100);
+            document.getElementById('water-total').textContent = `${total} / ${dailyWaterGoal} ml`;
+            const percent = Math.min((total / dailyWaterGoal) * 100, 100);
             document.getElementById('water-progress').style.width = percent + '%';
 
             const container = document.getElementById('water-entries');
@@ -434,18 +447,12 @@
                 <div class="flex justify-between items-center bg-blue-50 px-4 py-3 rounded-2xl">
                     <div class="flex items-center gap-3">
                         <span class="text-blue-600">💧</span>
-                        <div>
-                            <span class="font-medium">${entry.amount} ml</span>
-                            <span class="text-xs text-slate-500 ml-3">${entry.time}</span>
-                        </div>
+                        <div><span class="font-medium">${entry.amount} ml</span> <span class="text-xs text-slate-500">${entry.time}</span></div>
                     </div>
                     <button onclick="removeWater(${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
                 </div>
             `).join('');
         }
-
-        // Rest of your functions (favorites, meals, exercise, barcode, login, etc.)
-        // ... (All the functions you already had are kept below)
 
         function renderFavoriteFoods() {
             const container = document.getElementById('favorites-food-bar');
@@ -456,6 +463,7 @@
                 </div>
             `).join('') || '<p class="text-slate-400 text-sm">No favorite foods yet</p>';
         }
+
         function removeFavoriteFood(index) {
             if (confirm("Remove this favorite food?")) {
                 favoriteFoods.splice(index, 1);
@@ -463,6 +471,7 @@
                 renderFavoriteFoods();
             }
         }
+
         function renderFavoriteExercises() {
             const container = document.getElementById('favorites-exercise-bar');
             container.innerHTML = favoriteExercises.map((fav, i) => `
@@ -472,6 +481,7 @@
                 </div>
             `).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
         }
+
         function removeFavoriteExercise(index) {
             if (confirm("Remove this favorite exercise?")) {
                 favoriteExercises.splice(index, 1);
@@ -479,6 +489,7 @@
                 renderFavoriteExercises();
             }
         }
+
         function quickAddFavoriteFood(i) {
             const fav = favoriteFoods[i];
             const meal = prompt("Add to which meal?", "snacks");
@@ -488,6 +499,7 @@
             renderAll();
             saveCurrentData();
         }
+
         function quickAddFavoriteExercise(i) {
             const fav = favoriteExercises[i];
             if (!data.exercises) data.exercises = [];
@@ -501,11 +513,16 @@
             const totalEl = document.getElementById(meal + '-total');
             const items = data[meal] || [];
             let html = items.length === 0 ? `<p class="text-slate-400 text-center py-8">No items yet</p>` : '';
+
             items.forEach((item, i) => {
-                html += `<div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
-                    <div><div class="font-medium">${item.name}</div><div class="text-xs text-slate-400">${item.cal} kcal</div></div>
-                    <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
-                </div>`;
+                html += `
+                    <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
+                        <div>
+                            <div class="font-medium">${item.name}</div>
+                            <div class="text-xs text-slate-400">${item.cal} kcal</div>
+                        </div>
+                        <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                    </div>`;
             });
             list.innerHTML = html;
             totalEl.textContent = items.reduce((sum, it) => sum + it.cal, 0) + ' kcal';
@@ -514,12 +531,16 @@
         function renderExercises() {
             const container = document.getElementById('exercise-list');
             let html = '';
-            (data.exercises || []).forEach((ex, i) => {
+            data.exercises.forEach((ex, i) => {
                 const cal = Math.round(ex.minutes * ex.calPerMin);
-                html += `<div class="flex justify-between items-center bg-orange-50 px-4 py-3 rounded-2xl">
-                    <div>${ex.name} • ${ex.minutes} min</div>
-                    <div class="flex items-center gap-4"><span class="font-medium">${cal} kcal</span><button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div>
-                </div>`;
+                html += `
+                    <div class="flex justify-between items-center bg-orange-50 px-4 py-3 rounded-2xl">
+                        <div>${ex.name} • ${ex.minutes} min</div>
+                        <div class="flex items-center gap-4">
+                            <span class="font-medium">${cal} kcal</span>
+                            <button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>`;
             });
             container.innerHTML = html || `<p class="text-slate-400 py-4">No exercises logged</p>`;
         }
@@ -557,12 +578,15 @@
             const cal = parseInt(document.getElementById('food-calories').value);
             const isFavorite = document.getElementById('favorite-food-checkbox').checked;
             if (!name || !cal) return alert("Please enter food name and calories");
+
             if (!data[currentMealType]) data[currentMealType] = [];
             data[currentMealType].push({name, cal});
+
             if (isFavorite) {
                 favoriteFoods.push({name, cal});
                 saveFavorites();
             }
+
             hideModal();
             renderAll();
             saveCurrentData();
@@ -590,12 +614,16 @@
             const minutes = parseFloat(document.getElementById('exercise-minutes').value);
             const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
             const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
+
             if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
+
             data.exercises.push({name, minutes, calPerMin});
+
             if (isFavorite) {
                 favoriteExercises.push({name, minutes, calPerMin});
                 saveFavorites();
             }
+
             hideExerciseModal();
             renderAll();
             saveCurrentData();
@@ -634,7 +662,14 @@
             const pass = document.getElementById('signup-password').value;
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
-            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [], profile: {avatar:'🍎', displayName: user, waterGoal: 3000} };
+
+            users[user] = { 
+                password: pass, 
+                history: {}, 
+                favoriteFoods: [], 
+                favoriteExercises: [],
+                profile: { name: user, picture: '' }
+            };
             saveUsers();
             alert("Account created! Please login.");
             showLoginForm();
@@ -646,12 +681,10 @@
             if (!users[user] || users[user].password !== pass) return alert("Invalid username or password");
 
             currentUser = user;
-            if (users[user].profile) userProfile = users[user].profile;
-            else userProfile = { avatar: '🍎', displayName: user, waterGoal: 3000 };
-
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-            updateHeaderProfile();
+            
+            loadProfile();
             goToToday();
         }
 
@@ -663,7 +696,7 @@
             }
         }
 
-        // Barcode Scanner (unchanged)
+        // Barcode Scanner
         async function startBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.remove('hidden');
@@ -678,6 +711,7 @@
                 stopBarcodeScanner();
             }
         }
+
         function stopBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.add('hidden');
@@ -686,6 +720,7 @@
                 videoStream = null;
             }
         }
+
         async function detectBarcode(video) {
             const status = document.getElementById('scan-status');
             if ('BarcodeDetector' in window) {
@@ -695,9 +730,7 @@
                         const barcodes = await detector.detect(video);
                         if (barcodes.length > 0) {
                             clearInterval(interval);
-                            const barcode = barcodes[0].rawValue;
-                            status.textContent = `Found: ${barcode}`;
-                            await fetchProductInfo(barcode);
+                            await fetchProductInfo(barcodes[0].rawValue);
                             stopBarcodeScanner();
                         }
                     } catch(e) {}
@@ -707,6 +740,7 @@
                 setTimeout(stopBarcodeScanner, 2000);
             }
         }
+
         async function fetchProductInfo(barcode) {
             try {
                 const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
@@ -729,6 +763,16 @@
             } catch(e) {
                 alert("Could not fetch product info. Please add manually.");
             }
+        }
+
+        function renderAll() {
+            updateDateDisplay();
+            renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
+            renderExercises();
+            calculateTotals();
+            renderFavoriteFoods();
+            renderFavoriteExercises();
+            renderWater();
         }
 
         window.onload = () => {
