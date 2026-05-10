@@ -51,13 +51,14 @@
 
     <!-- Main App -->
     <div id="main-app" class="hidden">
+        <!-- Top Bar -->
         <div class="sticky top-0 bg-white border-b z-50 px-4 py-4">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
                 <div onclick="showProfileModal()" class="flex items-center gap-3 cursor-pointer">
                     <img id="header-avatar" src="https://via.placeholder.com/42" class="avatar" alt="Profile">
                     <div>
                         <h1 class="text-2xl font-bold">CalTrack</h1>
-                        <p id="greeting-text" class="text-sm text-slate-500 font-medium"></p>
+                        <p class="text-sm text-slate-500">Hi, <span id="current-user-display" class="font-medium"></span></p>
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -272,7 +273,6 @@
     </div>
 
     <script>
-        // All variables
         let currentUser = null;
         let users = {};
         let currentDate = new Date().toISOString().split('T')[0];
@@ -288,31 +288,22 @@
 
         const dailyWaterGoal = 3000;
 
-        const randomGreetings = [
-            "Hey {name} 👋", "Good morning {name} ☀️", "Hi there {name} ✨", 
-            "What's up {name}? 🔥", "Hello {name} ❤️", "Yo {name}!", 
-            "How's it going {name}?", "Sup {name} 😊", "Welcome back {name}!", 
-            "Let's crush today {name} 💪"
-        ];
-
-        function getRandomGreeting(name) {
-            const g = randomGreetings[Math.floor(Math.random() * randomGreetings.length)];
-            return g.replace("{name}", name);
-        }
-
         function safeGet(key) {
             try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } 
-            catch(e) { return null; }
+            catch(e) { storageAvailable = false; return null; }
         }
         function safeSet(key, value) {
-            try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) {}
+            try { localStorage.setItem(key, JSON.stringify(value)); } 
+            catch(e) { storageAvailable = false; }
         }
 
         function loadUsers() { 
             const saved = safeGet('caltrack_users'); 
             if(saved) users = saved; 
         }
-        function saveUsers() { safeSet('caltrack_users', users); }
+        function saveUsers() { 
+            if(storageAvailable) safeSet('caltrack_users', users); 
+        }
 
         function getDateData(date) {
             if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: currentUser, picture: '' } };
@@ -346,10 +337,9 @@
 
         function loadProfile() {
             currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '' };
-            const name = currentProfile.name || currentUser;
-            document.getElementById('current-user-display').textContent = name;
+            const displayName = currentProfile.name || currentUser;
+            document.getElementById('current-user-display').textContent = displayName;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
-            document.getElementById('greeting-text').textContent = getRandomGreeting(name);
         }
 
         function showProfileModal() {
@@ -380,7 +370,7 @@
             saveUsers();
             loadProfile();
             hideProfileModal();
-            alert("Profile updated!");
+            alert("Profile updated successfully!");
         }
 
         function renderCalendar() {
@@ -428,6 +418,7 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
+        // Water, Favorites, Meals, Exercise, Barcode, etc. (all functions)
         function addWater(ml) {
             if (!data.waterEntries) data.waterEntries = [];
             data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
@@ -719,7 +710,7 @@
                 video.play();
                 detectBarcode(video);
             } catch(e) {
-                alert("Camera access failed.");
+                alert("Camera access failed or not supported.");
                 stopBarcodeScanner();
             }
         }
@@ -727,7 +718,10 @@
         function stopBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.add('hidden');
-            if (videoStream) videoStream.getTracks().forEach(track => track.stop());
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
         }
 
         async function detectBarcode(video) {
@@ -745,7 +739,7 @@
                     } catch(e) {}
                 }, 400);
             } else {
-                status.textContent = "Barcode scanning not supported.";
+                status.textContent = "Barcode scanning not supported on this device.";
                 setTimeout(stopBarcodeScanner, 2000);
             }
         }
@@ -770,7 +764,7 @@
                     alert("Product not found. Please add manually.");
                 }
             } catch(e) {
-                alert("Could not fetch product info.");
+                alert("Could not fetch product info. Please add manually.");
             }
         }
 
