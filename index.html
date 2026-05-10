@@ -104,6 +104,11 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
+                    <!-- Settings Button -->
+                    <button onclick="showSettingsModal()" class="p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i class="fa-solid fa-gear text-xl"></i>
+                    </button>
+                    <!-- Dark Mode -->
                     <button onclick="toggleDarkMode()" class="p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i id="theme-icon-moon" class="fa-solid fa-moon text-xl dark:hidden"></i>
                         <i id="theme-icon-sun" class="fa-solid fa-sun text-xl hidden dark:block"></i>
@@ -153,7 +158,7 @@
                 <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-lg flex items-center gap-2 dark:text-white"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
-                        <div class="text-sm font-mono font-medium dark:text-white" id="water-total">0 / 3000 ml</div>
+                        <div class="text-sm font-mono font-medium dark:text-white" id="water-total">0 / <span id="water-goal-display">3000</span> ml</div>
                     </div>
                     <div class="h-4 bg-blue-100 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
                         <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
@@ -238,7 +243,7 @@
         </div>
     </div>
 
-    <!-- Profile Modal (Mobile-optimized upload) -->
+    <!-- Profile Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div class="bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-6 text-white">
@@ -248,7 +253,6 @@
             <div class="p-8">
                 <div class="flex flex-col items-center mb-8">
                     <img id="profile-avatar" src="https://via.placeholder.com/140" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl" alt="Profile">
-                    <!-- Mobile-optimized upload button -->
                     <label class="mt-8 cursor-pointer bg-emerald-100 dark:bg-slate-700 hover:bg-emerald-200 dark:hover:bg-slate-600 transition-colors text-emerald-700 dark:text-white px-8 py-4 rounded-3xl text-base font-medium flex items-center gap-3 shadow-md active:scale-95">
                         <i class="fa-solid fa-camera"></i>
                         Take Photo or Choose from Gallery
@@ -265,7 +269,54 @@
         </div>
     </div>
 
+    <!-- New Settings Modal -->
+    <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[110] p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
+            <div class="px-8 py-6 border-b dark:border-slate-700 flex items-center justify-between">
+                <h3 class="text-2xl font-bold">Settings</h3>
+                <button onclick="hideSettingsModal()" class="text-3xl leading-none">✕</button>
+            </div>
+            <div class="p-8 space-y-8">
+                <!-- Goals -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-lg">Personal Goals</h4>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Daily Calorie Goal</label>
+                            <input id="settings-calorie-goal" type="number" class="w-full px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 dark:bg-slate-700 dark:text-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">Daily Water Goal (ml)</label>
+                            <input id="settings-water-goal" type="number" class="w-full px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 dark:bg-slate-700 dark:text-white">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise Defaults -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-lg">Exercise Defaults</h4>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Default kcal per minute</label>
+                        <input id="settings-kcal-per-min" type="number" value="10" class="w-full px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 dark:bg-slate-700 dark:text-white">
+                    </div>
+                </div>
+
+                <!-- Data Management -->
+                <div>
+                    <h4 class="font-semibold mb-4 text-lg text-red-600">Data Management</h4>
+                    <button onclick="resetTodayData()" class="w-full py-4 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl text-red-600 font-medium mb-3">Reset Today's Data</button>
+                    <button onclick="clearAllHistory()" class="w-full py-4 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl text-red-600 font-medium">Clear All History (Dangerous)</button>
+                </div>
+            </div>
+            <div class="flex border-t dark:border-slate-700">
+                <button onclick="hideSettingsModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
+                <button onclick="saveSettings()" class="flex-1 py-5 bg-emerald-600 text-white font-semibold rounded-br-3xl">Save All Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Barcode, Food, Exercise Modals (unchanged) -->
+    <!-- ... (same as previous full version) ... -->
     <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[200] flex flex-col">
         <div class="p-4 flex justify-between text-white">
             <h3 class="font-semibold">Scan Barcode</h3>
@@ -332,9 +383,7 @@
         let favoriteExercises = [];
         let storageAvailable = true;
         let videoStream = null;
-        let currentProfile = { name: '', picture: '', darkMode: false };
-
-        const dailyWaterGoal = 3000;
+        let currentProfile = { name: '', picture: '', darkMode: false, waterGoal: 3000, kcalPerMin: 10 };
 
         function safeGet(key) {
             try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; }
@@ -348,7 +397,7 @@
         function saveUsers() { safeSet('caltrack_users', users); }
 
         function getDateData(date) {
-            if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: currentUser, picture: '', darkMode: false } };
+            if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: currentUser, picture: '', darkMode: false, waterGoal: 3000, kcalPerMin: 10 } };
             if (!users[currentUser].history[date]) {
                 users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
             }
@@ -375,7 +424,7 @@
         }
 
         function loadProfile() {
-            currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '', darkMode: false };
+            currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '', darkMode: false, waterGoal: 3000, kcalPerMin: 10 };
             document.getElementById('current-user-display').textContent = currentProfile.name || currentUser;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
             if (currentProfile.darkMode) document.documentElement.classList.add('dark');
@@ -392,12 +441,9 @@
         function uploadProfilePicture(e) {
             const file = e.target.files[0];
             if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Image is too large. Max 5MB.");
-                return;
-            }
+            if (file.size > 5 * 1024 * 1024) return alert("Image is too large. Max 5MB.");
             const reader = new FileReader();
-            reader.onload = function(ev) {
+            reader.onload = ev => {
                 document.getElementById('profile-avatar').src = ev.target.result;
                 currentProfile.picture = ev.target.result;
             };
@@ -423,7 +469,53 @@
             setTimeout(() => { html.style.transition = ''; }, 300);
         }
 
-        // Calendar (prettier version)
+        // Settings Modal
+        function showSettingsModal() {
+            document.getElementById('settings-calorie-goal').value = currentProfile.waterGoal ? currentProfile.waterGoal : 3000; // wait, calorie
+            document.getElementById('settings-calorie-goal').value = data.goal || 2000;
+            document.getElementById('settings-water-goal').value = currentProfile.waterGoal || 3000;
+            document.getElementById('settings-kcal-per-min').value = currentProfile.kcalPerMin || 10;
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
+        function hideSettingsModal() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
+        function saveSettings() {
+            const calorie = parseInt(document.getElementById('settings-calorie-goal').value) || 2000;
+            const water = parseInt(document.getElementById('settings-water-goal').value) || 3000;
+            const kcalMin = parseInt(document.getElementById('settings-kcal-per-min').value) || 10;
+
+            data.goal = calorie;
+            currentProfile.waterGoal = water;
+            currentProfile.kcalPerMin = kcalMin;
+
+            if (users[currentUser]) users[currentUser].profile = currentProfile;
+            saveUsers();
+            saveCurrentData();
+            hideSettingsModal();
+            renderAll();
+            alert("✅ Settings saved!");
+        }
+
+        function resetTodayData() {
+            if (confirm("Reset all data for today?")) {
+                data = { goal: data.goal, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
+                saveCurrentData();
+                hideSettingsModal();
+                renderAll();
+            }
+        }
+        function clearAllHistory() {
+            if (confirm("⚠️ Delete ALL history and favorites for this account? This cannot be undone.")) {
+                users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: currentProfile };
+                saveUsers();
+                hideSettingsModal();
+                alert("All data cleared.");
+                logout();
+            }
+        }
+
+        // Calendar, Water, Favorites, Meals, etc. (same as before)
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             const mobileGrid = document.getElementById('calendar-grid-mobile');
@@ -478,14 +570,28 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
-        // All other functions (water, favorites, meals, exercise, barcode, login, etc.)
-        function addWater(ml) { if (!data.waterEntries) data.waterEntries = []; data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) }); renderWater(); saveCurrentData(); }
-        function addWaterManual() { const ml = parseInt(document.getElementById('water-manual').value); if (ml > 0) addWater(ml); }
-        function removeWater(index) { if (confirm("Remove this water entry?")) { data.waterEntries.splice(index, 1); renderWater(); saveCurrentData(); } }
+        function addWater(ml) {
+            if (!data.waterEntries) data.waterEntries = [];
+            data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+            renderWater();
+            saveCurrentData();
+        }
+        function addWaterManual() {
+            const ml = parseInt(document.getElementById('water-manual').value);
+            if (ml > 0) addWater(ml);
+        }
+        function removeWater(index) {
+            if (confirm("Remove this water entry?")) {
+                data.waterEntries.splice(index, 1);
+                renderWater();
+                saveCurrentData();
+            }
+        }
         function renderWater() {
+            const goal = currentProfile.waterGoal || 3000;
             const total = (data.waterEntries || []).reduce((sum, e) => sum + e.amount, 0);
-            document.getElementById('water-total').textContent = `${total} / ${dailyWaterGoal} ml`;
-            document.getElementById('water-progress').style.width = Math.min((total / dailyWaterGoal) * 100, 100) + '%';
+            document.getElementById('water-total').innerHTML = `${total} / <span id="water-goal-display">${goal}</span> ml`;
+            document.getElementById('water-progress').style.width = Math.min((total / goal) * 100, 100) + '%';
             const container = document.getElementById('water-entries');
             container.innerHTML = (data.waterEntries || []).map((entry, i) => `
                 <div class="flex justify-between items-center bg-blue-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
@@ -547,7 +653,7 @@
             const container = document.getElementById('exercise-list');
             let html = '';
             data.exercises.forEach((ex, i) => {
-                const cal = Math.round(ex.minutes * ex.calPerMin);
+                const cal = Math.round(ex.minutes * (ex.calPerMin || currentProfile.kcalPerMin || 10));
                 html += `<div class="flex justify-between items-center bg-orange-50 dark:bg-orange-900/30 px-4 py-3 rounded-2xl"><div class="dark:text-white">${ex.name} • ${ex.minutes} min</div><div class="flex items-center gap-4"><span class="font-medium dark:text-white">${cal} kcal</span><button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`;
             });
             container.innerHTML = html || `<p class="text-slate-400 dark:text-slate-500 py-4">No exercises logged</p>`;
@@ -600,7 +706,7 @@
         function showExerciseModal() {
             document.getElementById('exercise-name').value = '';
             document.getElementById('exercise-minutes').value = 30;
-            document.getElementById('cal-per-min').value = 10;
+            document.getElementById('cal-per-min').value = currentProfile.kcalPerMin || 10;
             document.getElementById('favorite-exercise-checkbox').checked = false;
             document.getElementById('exercise-modal').classList.remove('hidden');
         }
@@ -609,9 +715,10 @@
         function addExercise() {
             const name = document.getElementById('exercise-name').value.trim();
             const minutes = parseFloat(document.getElementById('exercise-minutes').value);
-            const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
+            let calPerMin = parseFloat(document.getElementById('cal-per-min').value);
+            if (!calPerMin) calPerMin = currentProfile.kcalPerMin || 10;
             const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
-            if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
+            if (!name || !minutes) return alert("Please fill all fields");
             data.exercises.push({name, minutes, calPerMin});
             if (isFavorite) { favoriteExercises.push({name, minutes, calPerMin}); saveFavorites(); }
             hideExerciseModal();
@@ -646,7 +753,7 @@
             const pass = document.getElementById('signup-password').value;
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
-            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: user, picture: '', darkMode: false } };
+            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: user, picture: '', darkMode: false, waterGoal: 3000, kcalPerMin: 10 } };
             saveUsers();
             alert("Account created! Please login.");
             showLoginForm();
@@ -671,7 +778,7 @@
             }
         }
 
-        // Barcode Scanner
+        // Barcode Scanner (unchanged)
         async function startBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.remove('hidden');
