@@ -15,7 +15,7 @@
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .calendar-day { transition: all 0.2s; }
+        .calendar-day { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
         .calendar-day:hover { background-color: #ecfdf5; }
         .calendar-day.today { background-color: #a7f3d0; font-weight: 600; }
         .calendar-day.selected { background-color: #10b981; color: white; font-weight: 600; }
@@ -23,6 +23,26 @@
         .avatar { width: 42px; height: 42px; object-fit: cover; border-radius: 9999px; border: 2px solid white; }
         .favorites-scroll { scrollbar-width: none; }
         .favorites-scroll::-webkit-scrollbar { display: none; }
+
+        /* OPTIMIZED THEME SWITCH ANIMATION */
+        html {
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        body, .bg-white, .bg-slate-800, .bg-slate-700, .bg-slate-900,
+        .border-slate-200, .border-slate-600, .border-slate-700,
+        .text-slate-900, .text-slate-500, .text-white,
+        .meal-card, .rounded-3xl, .shadow-sm, .shadow-2xl {
+            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                        color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #water-progress, #progress-bar {
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        button, .rounded-2xl {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 dark:from-slate-950 dark:to-slate-900 pb-20">
@@ -64,7 +84,6 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <!-- Dark Mode Toggle -->
                     <button onclick="toggleDarkMode()" class="p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i id="theme-icon-moon" class="fa-solid fa-moon text-xl dark:hidden"></i>
                         <i id="theme-icon-sun" class="fa-solid fa-sun text-xl hidden dark:block"></i>
@@ -349,7 +368,6 @@
             document.getElementById('current-user-display').textContent = currentProfile.name || currentUser;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
 
-            // Apply user's saved dark mode preference
             if (currentProfile.darkMode) {
                 document.documentElement.classList.add('dark');
             } else {
@@ -389,26 +407,28 @@
         }
 
         function toggleDarkMode() {
-            const isDark = document.documentElement.classList.toggle('dark');
+            const html = document.documentElement;
+            html.style.transition = 'background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
+            
+            const isDark = html.classList.toggle('dark');
             currentProfile.darkMode = isDark;
+            
             if (currentUser && users[currentUser]) {
                 users[currentUser].profile = currentProfile;
                 saveUsers();
             }
+            
+            setTimeout(() => { html.style.transition = ''; }, 300);
         }
 
-        // Calendar, Water, Favorites, Meals, Exercise, Barcode, etc. (all functions from your last version)
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
             document.getElementById('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
-
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const todayStr = new Date().toISOString().split('T')[0];
-
             for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
-
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const div = document.createElement('div');
@@ -468,7 +488,6 @@
             document.getElementById('water-total').textContent = `${total} / ${dailyWaterGoal} ml`;
             const percent = Math.min((total / dailyWaterGoal) * 100, 100);
             document.getElementById('water-progress').style.width = percent + '%';
-
             const container = document.getElementById('water-entries');
             container.innerHTML = (data.waterEntries || []).map((entry, i) => `
                 <div class="flex justify-between items-center bg-blue-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
@@ -540,7 +559,6 @@
             const totalEl = document.getElementById(meal + '-total');
             const items = data[meal] || [];
             let html = items.length === 0 ? `<p class="text-slate-400 dark:text-slate-500 text-center py-8">No items yet</p>` : '';
-
             items.forEach((item, i) => {
                 html += `
                     <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
@@ -605,15 +623,12 @@
             const cal = parseInt(document.getElementById('food-calories').value);
             const isFavorite = document.getElementById('favorite-food-checkbox').checked;
             if (!name || !cal) return alert("Please enter food name and calories");
-
             if (!data[currentMealType]) data[currentMealType] = [];
             data[currentMealType].push({name, cal});
-
             if (isFavorite) {
                 favoriteFoods.push({name, cal});
                 saveFavorites();
             }
-
             hideModal();
             renderAll();
             saveCurrentData();
@@ -641,16 +656,12 @@
             const minutes = parseFloat(document.getElementById('exercise-minutes').value);
             const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
             const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
-
             if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
-
             data.exercises.push({name, minutes, calPerMin});
-
             if (isFavorite) {
                 favoriteExercises.push({name, minutes, calPerMin});
                 saveFavorites();
             }
-
             hideExerciseModal();
             renderAll();
             saveCurrentData();
@@ -689,7 +700,6 @@
             const pass = document.getElementById('signup-password').value;
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
-
             users[user] = {
                 password: pass,
                 history: {},
@@ -706,11 +716,9 @@
             const user = document.getElementById('login-username').value.trim().toLowerCase();
             const pass = document.getElementById('login-password').value;
             if (!users[user] || users[user].password !== pass) return alert("Invalid username or password");
-
             currentUser = user;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-           
             loadProfile();
             goToToday();
         }
@@ -723,7 +731,6 @@
             }
         }
 
-        // Barcode Scanner
         async function startBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.remove('hidden');
@@ -801,7 +808,6 @@
 
         window.onload = () => {
             loadUsers();
-            loadTheme();
         };
     </script>
 </body>
