@@ -58,7 +58,7 @@
                     <img id="header-avatar" src="https://via.placeholder.com/42" class="avatar" alt="Profile">
                     <div>
                         <h1 class="text-2xl font-bold">CalTrack</h1>
-                        <p class="text-sm text-slate-500">Hi, <span id="current-user-display" class="font-medium"></span></p>
+                        <p id="greeting-text" class="text-sm text-slate-500 font-medium"></p>
                     </div>
                 </div>
                 <div class="flex gap-2">
@@ -100,6 +100,7 @@
                 <div class="lg:col-span-9 space-y-6">
                     <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
 
+                    <!-- Barcode Scanner -->
                     <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3 text-lg">
                         <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
                     </button>
@@ -288,6 +289,24 @@
 
         const dailyWaterGoal = 3000;
 
+        const randomGreetings = [
+            "Hey {name} 👋",
+            "Good morning {name} ☀️",
+            "Hi there {name} ✨",
+            "What's up {name}? 🔥",
+            "Hello {name} ❤️",
+            "Yo {name}! ",
+            "How's it going {name}? ",
+            "Sup {name} 😊",
+            "Welcome back {name}!",
+            "Let's crush today {name} 💪"
+        ];
+
+        function getRandomGreeting(name) {
+            const greeting = randomGreetings[Math.floor(Math.random() * randomGreetings.length)];
+            return greeting.replace("{name}", name);
+        }
+
         function safeGet(key) {
             try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } 
             catch(e) { storageAvailable = false; return null; }
@@ -340,6 +359,7 @@
             const displayName = currentProfile.name || currentUser;
             document.getElementById('current-user-display').textContent = displayName;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
+            document.getElementById('greeting-text').textContent = getRandomGreeting(displayName);
         }
 
         function showProfileModal() {
@@ -418,7 +438,6 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
-        // Water, Favorites, Meals, Exercise, Barcode, etc. (all functions)
         function addWater(ml) {
             if (!data.waterEntries) data.waterEntries = [];
             data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
