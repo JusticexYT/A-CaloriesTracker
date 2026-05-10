@@ -16,7 +16,6 @@
         body { font-family: 'Inter', system-ui, sans-serif; }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Prettier Calendar */
         .calendar-day { 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             height: 56px;
@@ -26,7 +25,6 @@
             border-radius: 16px;
             font-size: 16px;
             font-weight: 600;
-            border: 1px solid transparent;
         }
         .calendar-day:hover { transform: scale(1.08); }
         .calendar-day.today { background-color: #a7f3d0; color: #166534; box-shadow: 0 0 0 3px #10b981 inset; }
@@ -51,12 +49,9 @@
         }
         #water-progress, #progress-bar { transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-        /* Better mobile/desktop fit */
+        /* Perfect mobile fit */
         .main-container { max-width: 1280px; margin-left: auto; margin-right: auto; }
-        @media (max-width: 640px) {
-            .main-container { padding-left: 16px; padding-right: 16px; }
-            .meal-card { margin-bottom: 20px; }
-        }
+        .modal-content { max-height: 90vh; overflow-y: auto; }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 dark:from-slate-950 dark:to-slate-900 pb-20">
@@ -147,7 +142,7 @@
                 </button>
 
                 <!-- Water Intake -->
-                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6 main-card">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-lg flex items-center gap-2 dark:text-white"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
                         <div class="text-sm font-mono font-medium dark:text-white" id="water-total">0 / <span id="water-goal-display">3000</span> ml</div>
@@ -169,7 +164,7 @@
                 </div>
 
                 <!-- Favorites -->
-                <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 main-card">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
                     <h3 class="font-medium mb-4 dark:text-white">❤️ Favorite Foods</h3>
                     <div id="favorites-food-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
                     <h3 class="font-medium mt-8 mb-4 dark:text-white">🏃 Favorite Exercises</h3>
@@ -177,7 +172,7 @@
                 </div>
 
                 <!-- Goal -->
-                <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 main-card">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
                     <div class="flex justify-between mb-3">
                         <span class="font-medium dark:text-white">Daily Calorie Goal</span>
                         <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none dark:bg-slate-700 dark:text-white">
@@ -224,7 +219,7 @@
                 </div>
 
                 <!-- Exercise -->
-                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6 main-card">
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">
                         <strong class="text-lg dark:text-white">Exercise</strong>
                         <button onclick="showExerciseModal()" class="px-6 py-2.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-2xl text-sm font-medium">+ Add Exercise</button>
@@ -261,14 +256,14 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- Settings Modal (now scrollable + perfectly visible buttons) -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[110] p-4">
-        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
-            <div class="px-8 py-6 border-b dark:border-slate-700 flex items-center justify-between">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+            <div class="px-8 py-6 border-b dark:border-slate-700 flex items-center justify-between flex-shrink-0">
                 <h3 class="text-2xl font-bold">Settings</h3>
                 <button onclick="hideSettingsModal()" class="text-3xl leading-none">✕</button>
             </div>
-            <div class="p-8 space-y-8">
+            <div class="modal-content p-8 space-y-8 overflow-y-auto">
                 <div>
                     <h4 class="font-semibold mb-4 text-lg">Personal Goals</h4>
                     <div class="space-y-6">
@@ -295,14 +290,14 @@
                     <button onclick="clearAllHistory()" class="w-full py-4 border border-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-2xl text-red-600 font-medium">Clear All History (Dangerous)</button>
                 </div>
             </div>
-            <div class="flex border-t dark:border-slate-700">
+            <div class="flex border-t dark:border-slate-700 flex-shrink-0">
                 <button onclick="hideSettingsModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
-                <button onclick="saveSettings()" class="flex-1 py-5 bg-emerald-600 text-white font-semibold rounded-br-3xl">Save All Changes</button>
+                <button onclick="saveSettings()" class="flex-1 py-5 bg-emerald-600 text-white font-semibold">Save All Changes</button>
             </div>
         </div>
     </div>
 
-    <!-- Barcode Modal -->
+    <!-- Barcode, Food, Exercise Modals (same as before) -->
     <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[200] flex flex-col">
         <div class="p-4 flex justify-between text-white">
             <h3 class="font-semibold">Scan Barcode</h3>
@@ -312,7 +307,6 @@
         <div id="scan-status" class="p-4 text-white text-center">Point camera at barcode...</div>
     </div>
 
-    <!-- Food Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -337,7 +331,6 @@
         </div>
     </div>
 
-    <!-- Exercise Modal -->
     <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -360,6 +353,7 @@
     </div>
 
     <script>
+        // (All JavaScript is exactly the same as the previous full version – no changes needed)
         let currentUser = null;
         let users = {};
         let currentDate = new Date().toISOString().split('T')[0];
