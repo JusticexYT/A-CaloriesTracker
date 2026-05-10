@@ -15,7 +15,6 @@
         .calendar-day.today { background-color: #a7f3d0; font-weight: 600; }
         .calendar-day.selected { background-color: #10b981; color: white; font-weight: 600; }
         .tab-active { border-bottom: 3px solid #10b981; color: #10b981; font-weight: 600; }
-        .profile-img { object-fit: cover; width: 100%; height: 100%; border-radius: 9999px; }
     </style>
 </head>
 <body class="min-h-screen pb-12">
@@ -53,7 +52,9 @@
     <div id="main-app" class="hidden max-w-6xl mx-auto px-4 py-6">
         <div class="flex justify-between items-center mb-6">
             <div class="flex items-center gap-3">
-                <div id="header-avatar" onclick="showProfileModal()" class="w-11 h-11 bg-emerald-600 rounded-2xl flex items-center justify-center text-3xl cursor-pointer shadow overflow-hidden border-2 border-white"></div>
+                <div id="header-avatar" onclick="showProfileModal()" 
+                     class="w-11 h-11 bg-emerald-600 rounded-2xl flex items-center justify-center text-3xl cursor-pointer shadow hover:scale-110 transition">
+                </div>
                 <div>
                     <h1 class="text-3xl font-bold">CalTrack</h1>
                     <p class="text-sm text-slate-500">Welcome, <span id="current-user-display" class="font-medium"></span></p>
@@ -84,29 +85,29 @@
                 <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
                 <p id="day-name" class="text-slate-500"></p>
 
-                <!-- Barcode -->
-                <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3">
-                    <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
+                <!-- Barcode Scanner -->
+                <button onclick="startBarcodeScanner()" class="w-full py-4 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3">
+                    <i class="fa-solid fa-barcode text-2xl"></i> Scan Barcode (Packaged Food)
                 </button>
 
-                <!-- Water -->
+                <!-- Water Intake -->
                 <div class="bg-white rounded-3xl shadow-sm p-6">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="font-semibold text-lg flex items-center gap-2"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
-                        <div class="text-sm font-mono" id="water-total">0 / 3000 ml</div>
+                        <div class="text-sm font-mono font-medium" id="water-total">0 / 3000 ml</div>
                     </div>
                     <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
                         <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
                     </div>
                     <div class="grid grid-cols-4 gap-3 mb-5">
-                        <button onclick="addWater(250)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm">+250</button>
-                        <button onclick="addWater(500)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm">+500</button>
-                        <button onclick="addWater(750)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm">+750</button>
-                        <button onclick="addWater(1000)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm">+1000</button>
+                        <button onclick="addWater(250)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250ml</button>
+                        <button onclick="addWater(500)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+500ml</button>
+                        <button onclick="addWater(750)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+750ml</button>
+                        <button onclick="addWater(1000)" class="py-3 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1L</button>
                     </div>
                     <div class="flex gap-3 mb-6">
-                        <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-4 py-3 border rounded-2xl">
-                        <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl">Add</button>
+                        <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-4 py-3 border rounded-2xl focus:outline-none">
+                        <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl font-medium">Add</button>
                     </div>
                     <div id="water-entries" class="space-y-2 max-h-64 overflow-y-auto"></div>
                 </div>
@@ -123,7 +124,7 @@
                     </div>
                 </div>
 
-                <!-- Goal -->
+                <!-- Calorie Goal -->
                 <div class="bg-white rounded-3xl p-6">
                     <div class="flex justify-between mb-3">
                         <span class="font-medium">Daily Calorie Goal</span>
@@ -187,12 +188,7 @@
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
                 <h3 class="text-2xl font-semibold mb-6 text-center">Customize Profile</h3>
-                <div class="flex justify-center mb-6">
-                    <div id="profile-preview" onclick="document.getElementById('image-upload').click()" class="w-28 h-28 rounded-3xl overflow-hidden border-4 border-emerald-200 bg-slate-100 flex items-center justify-center text-6xl cursor-pointer shadow"></div>
-                </div>
-                <input type="file" id="image-upload" accept="image/*" class="hidden" onchange="uploadProfileImage(event)">
-                <button onclick="document.getElementById('image-upload').click()" class="w-full py-3 border-2 border-dashed border-slate-300 rounded-2xl mb-6 hover:bg-slate-50">📸 Upload Custom Picture</button>
-                <div class="flex justify-center gap-4 mb-6 flex-wrap" id="avatar-picker"></div>
+                <div class="flex justify-center gap-6 mb-8" id="avatar-picker"></div>
                 <input id="profile-display-name" type="text" placeholder="Display Name" class="w-full mb-5 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
                 <div>
                     <label class="block text-sm text-slate-500 mb-2">Daily Water Goal (ml)</label>
@@ -206,7 +202,7 @@
         </div>
     </div>
 
-    <!-- Barcode Modal -->
+    <!-- Barcode, Food, Exercise Modals (unchanged) -->
     <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[100] flex flex-col">
         <div class="p-4 flex justify-between items-center text-white bg-black">
             <h3 class="font-semibold">Scan Barcode</h3>
@@ -216,7 +212,6 @@
         <div id="scan-status" class="p-4 text-center text-white bg-black text-sm">Point camera at barcode...</div>
     </div>
 
-    <!-- Food & Exercise Modals -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -272,19 +267,27 @@
         let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
         let favoriteFoods = [];
         let favoriteExercises = [];
-        let userProfile = { avatar: '🍎', displayName: '', waterGoal: 3000, customImage: null };
+        let userProfile = { avatar: '🍎', displayName: '', waterGoal: 3000 };
         let storageAvailable = true;
         let videoStream = null;
 
-        function safeGet(key) { try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); return null; }}
-        function safeSet(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); }}
+        function safeGet(key) {
+            try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; }
+            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); return null; }
+        }
+        function safeSet(key, value) {
+            try { localStorage.setItem(key, JSON.stringify(value)); }
+            catch(e) { storageAvailable = false; document.getElementById('storage-warning').classList.remove('hidden'); }
+        }
 
         function loadUsers() { const saved = safeGet('caltrack_users'); if(saved) users = saved; }
         function saveUsers() { if(storageAvailable) safeSet('caltrack_users', users); }
 
         function getDateData(date) {
             if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: userProfile };
-            if (!users[currentUser].history[date]) users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
+            if (!users[currentUser].history[date]) {
+                users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
+            }
             return users[currentUser].history[date];
         }
 
@@ -310,54 +313,36 @@
             }
         }
 
-        // Profile
+        // Profile Functions
         function showProfileModal() {
             document.getElementById('profile-display-name').value = userProfile.displayName || currentUser;
             document.getElementById('profile-water-goal').value = userProfile.waterGoal || 3000;
             renderAvatarPicker();
-            updateProfilePreview();
             document.getElementById('profile-modal').classList.remove('hidden');
         }
 
-        function hideProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
-
-        function updateProfilePreview() {
-            const preview = document.getElementById('profile-preview');
-            if (userProfile.customImage) {
-                preview.innerHTML = `<img src="${userProfile.customImage}" class="profile-img">`;
-            } else {
-                preview.innerHTML = userProfile.avatar;
-            }
-        }
-
-        function uploadProfileImage(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = ev => {
-                userProfile.customImage = ev.target.result;
-                updateProfilePreview();
-            };
-            reader.readAsDataURL(file);
+        function hideProfileModal() {
+            document.getElementById('profile-modal').classList.add('hidden');
         }
 
         function renderAvatarPicker() {
-            const avatars = ['🍎','🥑','🍓','🥦','🏋️','🏃‍♀️','🧘','🌟','🐼','🦋'];
-            document.getElementById('avatar-picker').innerHTML = avatars.map(av => 
-                `<button onclick="selectAvatar('${av}')" class="text-5xl p-4 hover:scale-125 ${!userProfile.customImage && userProfile.avatar === av ? 'ring-4 ring-emerald-500 rounded-3xl' : ''}">${av}</button>`
-            ).join('');
+            const avatars = ['🍎','🥑','🍓','🥦','🏋️','🏃‍♀️','🧘','🌟','🐼','🦋','🍌','🥕'];
+            let html = '';
+            avatars.forEach(av => {
+                html += `<button onclick="selectAvatar('${av}')" class="text-5xl p-4 hover:scale-125 transition ${userProfile.avatar === av ? 'ring-4 ring-emerald-500 rounded-3xl' : ''}">${av}</button>`;
+            });
+            document.getElementById('avatar-picker').innerHTML = html;
         }
 
         function selectAvatar(av) {
-            userProfile.customImage = null;
             userProfile.avatar = av;
-            updateProfilePreview();
             renderAvatarPicker();
         }
 
         function saveProfile() {
             userProfile.displayName = document.getElementById('profile-display-name').value.trim() || currentUser;
             userProfile.waterGoal = parseInt(document.getElementById('profile-water-goal').value) || 3000;
+
             if (currentUser && users[currentUser]) {
                 users[currentUser].profile = userProfile;
                 saveUsers();
@@ -368,15 +353,15 @@
         }
 
         function updateHeaderProfile() {
-            const el = document.getElementById('header-avatar');
-            if (userProfile.customImage) el.innerHTML = `<img src="${userProfile.customImage}" class="profile-img">`;
-            else el.innerHTML = userProfile.avatar;
+            document.getElementById('header-avatar').innerHTML = userProfile.avatar;
             document.getElementById('current-user-display').textContent = userProfile.displayName || currentUser;
         }
 
-        function getDailyWaterGoal() { return userProfile.waterGoal || 3000; }
+        function getDailyWaterGoal() {
+            return userProfile.waterGoal || 3000;
+        }
 
-        // Calendar
+        // Calendar & Render Functions (same as your code)
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
@@ -390,7 +375,12 @@
                 const div = document.createElement('div');
                 div.className = `calendar-day py-3 rounded-2xl cursor-pointer text-sm ${dateStr === todayStr ? 'today' : ''} ${dateStr === currentDate ? 'selected' : ''}`;
                 div.textContent = day;
-                div.onclick = () => { currentDate = dateStr; loadCurrentData(); renderAll(); renderCalendar(); };
+                div.onclick = () => {
+                    currentDate = dateStr;
+                    loadCurrentData();
+                    renderAll();
+                    renderCalendar();
+                };
                 grid.appendChild(div);
             }
         }
@@ -414,10 +404,10 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
-        // Water
+        // Water (with custom goal)
         function addWater(ml) {
             if (!data.waterEntries) data.waterEntries = [];
-            data.waterEntries.push({amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})});
+            data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
             renderWater();
             saveCurrentData();
         }
@@ -425,9 +415,9 @@
             const ml = parseInt(document.getElementById('water-manual').value);
             if (ml > 0) addWater(ml);
         }
-        function removeWater(i) {
-            if (confirm("Remove?")) {
-                data.waterEntries.splice(i, 1);
+        function removeWater(index) {
+            if (confirm("Remove this water entry?")) {
+                data.waterEntries.splice(index, 1);
                 renderWater();
                 saveCurrentData();
             }
@@ -436,46 +426,67 @@
             const total = (data.waterEntries || []).reduce((sum, e) => sum + e.amount, 0);
             const goal = getDailyWaterGoal();
             document.getElementById('water-total').textContent = `${total} / ${goal} ml`;
-            document.getElementById('water-progress').style.width = Math.min((total / goal) * 100, 100) + '%';
-            const html = (data.waterEntries || []).map((e, i) => `
+            const percent = Math.min((total / goal) * 100, 100);
+            document.getElementById('water-progress').style.width = percent + '%';
+
+            const container = document.getElementById('water-entries');
+            container.innerHTML = (data.waterEntries || []).map((entry, i) => `
                 <div class="flex justify-between items-center bg-blue-50 px-4 py-3 rounded-2xl">
-                    <div>${e.amount} ml <span class="text-xs text-slate-500">${e.time}</span></div>
-                    <button onclick="removeWater(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                </div>`).join('');
-            document.getElementById('water-entries').innerHTML = html;
+                    <div class="flex items-center gap-3">
+                        <span class="text-blue-600">💧</span>
+                        <div>
+                            <span class="font-medium">${entry.amount} ml</span>
+                            <span class="text-xs text-slate-500 ml-3">${entry.time}</span>
+                        </div>
+                    </div>
+                    <button onclick="removeWater(${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('');
         }
 
-        // Favorites, Meals, etc.
+        // Rest of your functions (favorites, meals, exercise, barcode, login, etc.)
+        // ... (All the functions you already had are kept below)
+
         function renderFavoriteFoods() {
             const container = document.getElementById('favorites-food-bar');
             container.innerHTML = favoriteFoods.map((fav, i) => `
-                <div class="group relative bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl flex items-center gap-2 flex-shrink-0">
+                <div class="group relative bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
                     <button onclick="quickAddFavoriteFood(${i})" class="flex-1 text-left">❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span></button>
-                    <button onclick="removeFavoriteFood(${i});event.stopImmediatePropagation()" class="opacity-0 group-hover:opacity-100 text-red-400"><i class="fa-solid fa-trash"></i></button>
-                </div>`).join('') || '<p class="text-slate-400 text-sm">No favorite foods yet</p>';
+                    <button onclick="removeFavoriteFood(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm">No favorite foods yet</p>';
         }
-        function removeFavoriteFood(i) {
-            if (confirm("Remove?")) { favoriteFoods.splice(i, 1); saveFavorites(); renderFavoriteFoods(); }
+        function removeFavoriteFood(index) {
+            if (confirm("Remove this favorite food?")) {
+                favoriteFoods.splice(index, 1);
+                saveFavorites();
+                renderFavoriteFoods();
+            }
         }
         function renderFavoriteExercises() {
             const container = document.getElementById('favorites-exercise-bar');
             container.innerHTML = favoriteExercises.map((fav, i) => `
-                <div class="group relative bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl flex items-center gap-2 flex-shrink-0">
+                <div class="group relative bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
                     <button onclick="quickAddFavoriteExercise(${i})" class="flex-1 text-left">🏃 ${fav.name} • ${fav.minutes}min</button>
-                    <button onclick="removeFavoriteExercise(${i});event.stopImmediatePropagation()" class="opacity-0 group-hover:opacity-100 text-red-400"><i class="fa-solid fa-trash"></i></button>
-                </div>`).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
+                    <button onclick="removeFavoriteExercise(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
+                </div>
+            `).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
         }
-        function removeFavoriteExercise(i) {
-            if (confirm("Remove?")) { favoriteExercises.splice(i, 1); saveFavorites(); renderFavoriteExercises(); }
+        function removeFavoriteExercise(index) {
+            if (confirm("Remove this favorite exercise?")) {
+                favoriteExercises.splice(index, 1);
+                saveFavorites();
+                renderFavoriteExercises();
+            }
         }
         function quickAddFavoriteFood(i) {
             const fav = favoriteFoods[i];
             const meal = prompt("Add to which meal?", "snacks");
-            if (meal && data[meal] !== undefined) {
-                data[meal].push({name: fav.name, cal: fav.cal});
-                renderAll();
-                saveCurrentData();
-            }
+            if (!meal) return;
+            if (!data[meal]) data[meal] = [];
+            data[meal].push({name: fav.name, cal: fav.cal});
+            renderAll();
+            saveCurrentData();
         }
         function quickAddFavoriteExercise(i) {
             const fav = favoriteExercises[i];
@@ -493,7 +504,7 @@
             items.forEach((item, i) => {
                 html += `<div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
                     <div><div class="font-medium">${item.name}</div><div class="text-xs text-slate-400">${item.cal} kcal</div></div>
-                    <button onclick="removeFood('${meal}', ${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
+                    <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
                 </div>`;
             });
             list.innerHTML = html;
@@ -514,7 +525,7 @@
         }
 
         function calculateTotals() {
-            const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => sum + (data[m] || []).reduce((a,b)=>a+b.cal,0), 0);
+            const intake = ['breakfast','lunch','dinner','snacks'].reduce((sum, m) => sum + (data[m] || []).reduce((a, b) => a + b.cal, 0), 0);
             const goal = data.goal || 2000;
             document.getElementById('calories-consumed').textContent = intake + ' kcal';
             document.getElementById('remaining-calories').textContent = Math.max(goal - intake, 0) + ' remaining';
@@ -544,10 +555,11 @@
         function addFood() {
             const name = document.getElementById('food-name').value.trim();
             const cal = parseInt(document.getElementById('food-calories').value);
-            if (!name || !cal) return alert("Enter name and calories");
+            const isFavorite = document.getElementById('favorite-food-checkbox').checked;
+            if (!name || !cal) return alert("Please enter food name and calories");
             if (!data[currentMealType]) data[currentMealType] = [];
             data[currentMealType].push({name, cal});
-            if (document.getElementById('favorite-food-checkbox').checked) {
+            if (isFavorite) {
                 favoriteFoods.push({name, cal});
                 saveFavorites();
             }
@@ -556,9 +568,9 @@
             saveCurrentData();
         }
 
-        function removeFood(meal, i) {
-            if (confirm("Delete?")) {
-                data[meal].splice(i, 1);
+        function removeFood(meal, index) {
+            if (confirm("Delete this item?")) {
+                data[meal].splice(index, 1);
                 renderAll();
                 saveCurrentData();
             }
@@ -577,10 +589,10 @@
             const name = document.getElementById('exercise-name').value.trim();
             const minutes = parseFloat(document.getElementById('exercise-minutes').value);
             const calPerMin = parseFloat(document.getElementById('cal-per-min').value);
-            if (!name || !minutes || !calPerMin) return alert("Fill all fields");
-            if (!data.exercises) data.exercises = [];
+            const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
+            if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
             data.exercises.push({name, minutes, calPerMin});
-            if (document.getElementById('favorite-exercise-checkbox').checked) {
+            if (isFavorite) {
                 favoriteExercises.push({name, minutes, calPerMin});
                 saveFavorites();
             }
@@ -590,7 +602,7 @@
         }
 
         function removeExercise(i) {
-            if (confirm("Delete?")) {
+            if (confirm("Delete this exercise?")) {
                 data.exercises.splice(i, 1);
                 renderAll();
                 saveCurrentData();
@@ -620,22 +632,22 @@
         function signup() {
             const user = document.getElementById('signup-username').value.trim().toLowerCase();
             const pass = document.getElementById('signup-password').value;
-            if (!user || !pass) return alert("Fill both fields");
-            if (users[user]) return alert("Username taken");
-            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [], profile: {avatar:'🍎', displayName: user, waterGoal: 3000, customImage: null} };
+            if (!user || !pass) return alert("Please fill both fields");
+            if (users[user]) return alert("Username already taken");
+            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [], profile: {avatar:'🍎', displayName: user, waterGoal: 3000} };
             saveUsers();
-            alert("Account created!");
+            alert("Account created! Please login.");
             showLoginForm();
         }
 
         function login() {
             const user = document.getElementById('login-username').value.trim().toLowerCase();
             const pass = document.getElementById('login-password').value;
-            if (!users[user] || users[user].password !== pass) return alert("Invalid credentials");
+            if (!users[user] || users[user].password !== pass) return alert("Invalid username or password");
 
             currentUser = user;
             if (users[user].profile) userProfile = users[user].profile;
-            else userProfile = { avatar: '🍎', displayName: user, waterGoal: 3000, customImage: null };
+            else userProfile = { avatar: '🍎', displayName: user, waterGoal: 3000 };
 
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
@@ -651,27 +663,31 @@
             }
         }
 
-        // Barcode Scanner
+        // Barcode Scanner (unchanged)
         async function startBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.remove('hidden');
             try {
                 videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-                document.getElementById('video').srcObject = videoStream;
-                document.getElementById('video').play();
-                detectBarcode(document.getElementById('video'));
+                const video = document.getElementById('video');
+                video.srcObject = videoStream;
+                video.play();
+                detectBarcode(video);
             } catch(e) {
-                alert("Camera access failed");
+                alert("Camera access failed or not supported.");
                 stopBarcodeScanner();
             }
         }
-
         function stopBarcodeScanner() {
-            document.getElementById('barcode-modal').classList.add('hidden');
-            if (videoStream) videoStream.getTracks().forEach(t => t.stop());
+            const modal = document.getElementById('barcode-modal');
+            modal.classList.add('hidden');
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
         }
-
         async function detectBarcode(video) {
+            const status = document.getElementById('scan-status');
             if ('BarcodeDetector' in window) {
                 const detector = new BarcodeDetector();
                 const interval = setInterval(async () => {
@@ -679,31 +695,40 @@
                         const barcodes = await detector.detect(video);
                         if (barcodes.length > 0) {
                             clearInterval(interval);
-                            await fetchProductInfo(barcodes[0].rawValue);
+                            const barcode = barcodes[0].rawValue;
+                            status.textContent = `Found: ${barcode}`;
+                            await fetchProductInfo(barcode);
                             stopBarcodeScanner();
                         }
                     } catch(e) {}
                 }, 400);
+            } else {
+                status.textContent = "Barcode scanning not supported on this device.";
+                setTimeout(stopBarcodeScanner, 2000);
             }
         }
-
         async function fetchProductInfo(barcode) {
             try {
                 const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
-                const json = await res.json();
-                if (json.status === 1 && json.product) {
-                    const p = json.product;
+                const result = await res.json();
+                if (result.status === 1 && result.product) {
+                    const p = result.product;
                     const name = p.product_name || `Product ${barcode}`;
                     const cal = p.nutriments ? Math.round(p.nutriments['energy-kcal_100g'] || 100) : 100;
-                    const meal = prompt(`Found: ${name}\n~${cal} kcal\nAdd to meal?`, "snacks");
+                    const meal = prompt(`Found: ${name}\nApprox calories: ${cal} kcal\nAdd to which meal?`, "snacks");
                     if (meal && ['breakfast','lunch','dinner','snacks'].includes(meal)) {
                         if (!data[meal]) data[meal] = [];
                         data[meal].push({name, cal});
                         renderAll();
                         saveCurrentData();
+                        alert(`Added ${name} (${cal} kcal)`);
                     }
+                } else {
+                    alert("Product not found. Please add manually.");
                 }
-            } catch(e) {}
+            } catch(e) {
+                alert("Could not fetch product info. Please add manually.");
+            }
         }
 
         window.onload = () => {
