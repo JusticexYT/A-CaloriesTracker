@@ -1,12 +1,15 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CalTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { content: [] };
+        tailwind.config = { 
+            content: [],
+            darkMode: 'class'
+        };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
@@ -20,39 +23,36 @@
         .avatar { width: 42px; height: 42px; object-fit: cover; border-radius: 9999px; border: 2px solid white; }
         .favorites-scroll { scrollbar-width: none; }
         .favorites-scroll::-webkit-scrollbar { display: none; }
-        
-        /* Enhanced Profile Modal */
-        .profile-avatar {
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .profile-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-        }
+
+        /* Dark Mode Enhancements */
+        .dark .calendar-day:hover { background-color: #334155; }
+        .dark .calendar-day.today { background-color: #10b981; color: white; }
+        .dark .calendar-day.selected { background-color: #34d399; color: black; }
+        .dark .meal-card { background-color: #1e2937; }
     </style>
 </head>
-<body class="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 pb-20">
+<body class="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 dark:from-slate-950 dark:to-slate-900 pb-20">
 
     <!-- Login Screen -->
-    <div id="login-screen" class="fixed inset-0 bg-white z-50 flex items-center justify-center p-4">
-        <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8">
+    <div id="login-screen" class="fixed inset-0 bg-white dark:bg-slate-900 z-50 flex items-center justify-center p-4">
+        <div class="max-w-md w-full bg-white dark:bg-slate-800 rounded-3xl shadow-2xl p-8">
             <div class="text-center mb-8">
                 <div class="w-20 h-20 mx-auto bg-emerald-600 rounded-3xl flex items-center justify-center text-white text-5xl mb-4">🍎</div>
-                <h1 class="text-4xl font-bold">CalTrack</h1>
-                <p class="text-slate-500">For you & her ❤️</p>
+                <h1 class="text-4xl font-bold text-slate-900 dark:text-white">CalTrack</h1>
+                <p class="text-slate-500 dark:text-slate-400">For you & her ❤️</p>
             </div>
-            <div class="flex border-b mb-6">
-                <button onclick="showLoginForm()" id="tab-login" class="tab-active flex-1 py-4 font-medium">Login</button>
-                <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-4 font-medium text-slate-400">Sign Up</button>
+            <div class="flex border-b mb-6 dark:border-slate-700">
+                <button onclick="showLoginForm()" id="tab-login" class="tab-active flex-1 py-4 font-medium text-slate-900 dark:text-white">Login</button>
+                <button onclick="showSignupForm()" id="tab-signup" class="flex-1 py-4 font-medium text-slate-400 dark:text-slate-500">Sign Up</button>
             </div>
             <div id="login-form">
-                <input id="login-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <input id="login-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="login-username" type="text" placeholder="Username" class="w-full mb-4 px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 bg-white dark:bg-slate-700 dark:text-white">
+                <input id="login-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 bg-white dark:bg-slate-700 dark:text-white">
                 <button onclick="login()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Login</button>
             </div>
             <div id="signup-form" class="hidden">
-                <input id="signup-username" type="text" placeholder="Choose username" class="w-full mb-4 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
-                <input id="signup-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border rounded-2xl focus:outline-none focus:border-emerald-500">
+                <input id="signup-username" type="text" placeholder="Choose username" class="w-full mb-4 px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 bg-white dark:bg-slate-700 dark:text-white">
+                <input id="signup-password" type="password" placeholder="Password" class="w-full mb-6 px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 bg-white dark:bg-slate-700 dark:text-white">
                 <button onclick="signup()" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl">Create Account</button>
             </div>
         </div>
@@ -60,31 +60,37 @@
 
     <!-- Main App -->
     <div id="main-app" class="hidden">
-        <div class="sticky top-0 bg-white border-b z-50 px-4 py-4">
+        <!-- Top Bar -->
+        <div class="sticky top-0 bg-white dark:bg-slate-900 border-b dark:border-slate-700 z-50 px-4 py-4">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
                 <div onclick="showProfileModal()" class="flex items-center gap-3 cursor-pointer">
                     <img id="header-avatar" src="https://via.placeholder.com/42" class="avatar" alt="Profile">
                     <div>
-                        <h1 class="text-2xl font-bold">CalTrack</h1>
-                        <p class="text-sm text-slate-500">Hi, <span id="current-user-display" class="font-medium"></span> 👋</p>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">CalTrack</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">Hi, <span id="current-user-display" class="font-medium"></span> 👋</p>
                     </div>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex items-center gap-3">
+                    <!-- Dark Mode Toggle -->
+                    <button onclick="toggleDarkMode()" class="p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        <i id="theme-icon-moon" class="fa-solid fa-moon text-xl dark:hidden"></i>
+                        <i id="theme-icon-sun" class="fa-solid fa-sun text-xl hidden dark:block"></i>
+                    </button>
                     <button onclick="goToToday()" class="px-5 py-2.5 bg-emerald-600 text-white rounded-2xl text-sm font-medium">Today</button>
-                    <button onclick="logout()" class="px-5 py-2.5 border rounded-2xl text-sm font-medium">Logout</button>
+                    <button onclick="logout()" class="px-5 py-2.5 border dark:border-slate-600 rounded-2xl text-sm font-medium">Logout</button>
                 </div>
             </div>
         </div>
 
         <div class="max-w-6xl mx-auto px-4 pt-6">
             <!-- Mobile Calendar -->
-            <div class="lg:hidden bg-white rounded-3xl shadow-sm p-5 mb-6">
+            <div class="lg:hidden bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-5 mb-6">
                 <div class="flex justify-between mb-4">
-                    <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="calendar-title-mobile" class="font-semibold text-lg"></h3>
-                    <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
+                    <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="calendar-title-mobile" class="font-semibold text-lg dark:text-white"></h3>
+                    <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
-                <div class="grid grid-cols-7 text-center text-xs text-slate-500 mb-2">
+                <div class="grid grid-cols-7 text-center text-xs text-slate-500 dark:text-slate-400 mb-2">
                     <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
                 </div>
                 <div id="calendar-grid-mobile" class="grid grid-cols-7 gap-1 text-center"></div>
@@ -92,13 +98,13 @@
 
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 <!-- Desktop Calendar -->
-                <div class="hidden lg:block lg:col-span-3 bg-white rounded-3xl shadow-sm p-5">
+                <div class="hidden lg:block lg:col-span-3 bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-5">
                     <div class="flex justify-between mb-4">
-                        <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
-                        <h3 id="calendar-title" class="font-semibold text-lg"></h3>
-                        <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
+                        <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
+                        <h3 id="calendar-title" class="font-semibold text-lg dark:text-white"></h3>
+                        <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
                     </div>
-                    <div class="grid grid-cols-7 text-center text-xs text-slate-500 mb-2">
+                    <div class="grid grid-cols-7 text-center text-xs text-slate-500 dark:text-slate-400 mb-2">
                         <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
                     </div>
                     <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
@@ -106,52 +112,53 @@
 
                 <!-- Main Content -->
                 <div class="lg:col-span-9 space-y-6">
-                    <h2 id="selected-date-display" class="text-2xl font-semibold"></h2>
+                    <h2 id="selected-date-display" class="text-2xl font-semibold dark:text-white"></h2>
 
+                    <!-- Barcode Scanner -->
                     <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3 text-lg">
                         <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
                     </button>
 
                     <!-- Water Intake -->
-                    <div class="bg-white rounded-3xl shadow-sm p-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-semibold text-lg flex items-center gap-2"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
-                            <div class="text-sm font-mono font-medium" id="water-total">0 / 3000 ml</div>
+                            <h3 class="font-semibold text-lg flex items-center gap-2 dark:text-white"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
+                            <div class="text-sm font-mono font-medium dark:text-white" id="water-total">0 / 3000 ml</div>
                         </div>
-                        <div class="h-4 bg-blue-100 rounded-full overflow-hidden mb-4">
+                        <div class="h-4 bg-blue-100 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
                             <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
                         </div>
                         <div class="grid grid-cols-4 gap-3 mb-5">
-                            <button onclick="addWater(250)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+250</button>
-                            <button onclick="addWater(500)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+500</button>
-                            <button onclick="addWater(750)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+750</button>
-                            <button onclick="addWater(1000)" class="py-4 bg-blue-50 hover:bg-blue-100 rounded-2xl text-sm font-medium">+1000</button>
+                            <button onclick="addWater(250)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+250</button>
+                            <button onclick="addWater(500)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+500</button>
+                            <button onclick="addWater(750)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+750</button>
+                            <button onclick="addWater(1000)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+1000</button>
                         </div>
                         <div class="flex gap-3">
-                            <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-5 py-4 border rounded-2xl focus:outline-none">
+                            <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none dark:bg-slate-700 dark:text-white">
                             <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl">Add</button>
                         </div>
                         <div id="water-entries" class="mt-6 space-y-3 max-h-60 overflow-y-auto"></div>
                     </div>
 
                     <!-- Favorites -->
-                    <div class="bg-white rounded-3xl p-6">
-                        <h3 class="font-medium mb-4">❤️ Favorite Foods</h3>
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
+                        <h3 class="font-medium mb-4 dark:text-white">❤️ Favorite Foods</h3>
                         <div id="favorites-food-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
-                        <h3 class="font-medium mt-8 mb-4">🏃 Favorite Exercises</h3>
+                        <h3 class="font-medium mt-8 mb-4 dark:text-white">🏃 Favorite Exercises</h3>
                         <div id="favorites-exercise-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
                     </div>
 
                     <!-- Goal -->
-                    <div class="bg-white rounded-3xl p-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
                         <div class="flex justify-between mb-3">
-                            <span class="font-medium">Daily Calorie Goal</span>
-                            <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none">
+                            <span class="font-medium dark:text-white">Daily Calorie Goal</span>
+                            <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none dark:bg-slate-700 dark:text-white">
                         </div>
-                        <div class="h-3 bg-slate-100 rounded-full overflow-hidden">
+                        <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
                             <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all"></div>
                         </div>
-                        <div class="flex justify-between text-sm mt-2">
+                        <div class="flex justify-between text-sm mt-2 dark:text-white">
                             <span id="calories-consumed">0 kcal</span>
                             <span id="remaining-calories">2000 remaining</span>
                         </div>
@@ -159,41 +166,41 @@
 
                     <!-- Meals -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="meal-card bg-white rounded-3xl shadow-sm">
-                            <div class="bg-amber-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">☀️</span><div><strong>Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('breakfast')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                            <div class="bg-amber-50 dark:bg-amber-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">☀️</span><div><strong class="dark:text-white">Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('breakfast')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
                             </div>
                             <div id="breakfast-list" class="p-5 space-y-3 min-h-[120px]"></div>
                         </div>
-                        <div class="meal-card bg-white rounded-3xl shadow-sm">
-                            <div class="bg-blue-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">🍲</span><div><strong>Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('lunch')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                            <div class="bg-blue-50 dark:bg-blue-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">🍲</span><div><strong class="dark:text-white">Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('lunch')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
                             </div>
                             <div id="lunch-list" class="p-5 space-y-3 min-h-[120px]"></div>
                         </div>
-                        <div class="meal-card bg-white rounded-3xl shadow-sm">
-                            <div class="bg-indigo-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">🌙</span><div><strong>Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('dinner')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                            <div class="bg-indigo-50 dark:bg-indigo-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">🌙</span><div><strong class="dark:text-white">Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('dinner')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
                             </div>
                             <div id="dinner-list" class="p-5 space-y-3 min-h-[120px]"></div>
                         </div>
-                        <div class="meal-card bg-white rounded-3xl shadow-sm">
-                            <div class="bg-pink-50 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">🍪</span><div><strong>Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('snacks')" class="p-3 bg-white rounded-2xl shadow text-xl">＋</button>
+                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                            <div class="bg-pink-50 dark:bg-pink-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                                <div class="flex items-center gap-3"><span class="text-3xl">🍪</span><div><strong class="dark:text-white">Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div></div>
+                                <button onclick="showAddModal('snacks')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
                             </div>
                             <div id="snacks-list" class="p-5 space-y-3 min-h-[120px]"></div>
                         </div>
                     </div>
 
                     <!-- Exercise -->
-                    <div class="bg-white rounded-3xl shadow-sm p-6">
+                    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
                         <div class="flex justify-between items-center mb-4">
-                            <strong class="text-lg">Exercise</strong>
-                            <button onclick="showExerciseModal()" class="px-6 py-2.5 bg-orange-100 text-orange-700 rounded-2xl text-sm font-medium">+ Add Exercise</button>
+                            <strong class="text-lg dark:text-white">Exercise</strong>
+                            <button onclick="showExerciseModal()" class="px-6 py-2.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-2xl text-sm font-medium">+ Add Exercise</button>
                         </div>
                         <div id="exercise-list" class="space-y-3"></div>
                     </div>
@@ -202,47 +209,25 @@
         </div>
     </div>
 
-    <!-- Enhanced Profile Modal -->
+    <!-- Profile Modal -->
     <div id="profile-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[100] p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
-            <!-- Header -->
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md overflow-hidden shadow-2xl">
             <div class="bg-gradient-to-r from-emerald-500 to-teal-500 px-8 py-6 text-white">
                 <h3 class="text-2xl font-bold text-center">Profile Settings</h3>
                 <p class="text-center text-emerald-100 mt-1 text-sm">Customize how you appear</p>
             </div>
-
             <div class="p-8">
                 <div class="flex flex-col items-center mb-8">
-                    <div class="relative">
-                        <img id="profile-avatar" 
-                             src="https://via.placeholder.com/140" 
-                             class="profile-avatar w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl" 
-                             alt="Profile">
-                    </div>
-                    <label class="mt-6 cursor-pointer bg-emerald-50 hover:bg-emerald-100 transition-colors text-emerald-700 px-6 py-3 rounded-2xl text-sm font-medium flex items-center gap-2">
-                        <i class="fa-solid fa-upload"></i> 
-                        Upload New Photo
+                    <img id="profile-avatar" src="https://via.placeholder.com/140" class="w-32 h-32 rounded-full object-cover border-4 border-white shadow-xl" alt="Profile">
+                    <label class="mt-6 cursor-pointer bg-emerald-100 dark:bg-slate-700 hover:bg-emerald-200 dark:hover:bg-slate-600 transition-colors text-emerald-700 dark:text-white px-6 py-3 rounded-2xl text-sm font-medium flex items-center gap-2">
+                        📷 Change Photo
                         <input type="file" id="avatar-upload" accept="image/*" class="hidden" onchange="uploadProfilePicture(event)">
                     </label>
                 </div>
-
-                <div class="space-y-2">
-                    <label class="block text-sm font-medium text-slate-600 mb-1">Display Name / Nickname</label>
-                    <input id="profile-name" 
-                           type="text" 
-                           class="w-full px-5 py-4 border border-slate-200 rounded-2xl focus:outline-none focus:border-emerald-500 text-lg text-center"
-                           placeholder="Your Name">
-                </div>
-
+                <input id="profile-name" type="text" class="w-full px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none focus:border-emerald-500 text-lg text-center dark:bg-slate-700 dark:text-white" placeholder="Display Name / Nickname">
                 <div class="mt-10 grid grid-cols-2 gap-4">
-                    <button onclick="hideProfileModal()" 
-                            class="py-4 border border-slate-300 rounded-2xl font-medium hover:bg-slate-50 transition-colors">
-                        Cancel
-                    </button>
-                    <button onclick="saveProfile()" 
-                            class="py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold transition-colors">
-                        Save Changes
-                    </button>
+                    <button onclick="hideProfileModal()" class="py-4 border dark:border-slate-600 rounded-2xl font-medium">Cancel</button>
+                    <button onclick="saveProfile()" class="py-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl font-semibold">Save Changes</button>
                 </div>
             </div>
         </div>
@@ -260,24 +245,24 @@
 
     <!-- Food Modal -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
             <div class="p-6">
-                <h3 class="text-xl font-semibold mb-4">Add Food</h3>
-                <select id="meal-type" class="w-full mb-4 p-4 border rounded-2xl">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">Add Food</h3>
+                <select id="meal-type" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
                     <option value="breakfast">Breakfast</option>
                     <option value="lunch">Lunch</option>
                     <option value="dinner">Dinner</option>
                     <option value="snacks">Snacks</option>
                 </select>
-                <input id="food-name" type="text" placeholder="Food name" class="w-full mb-4 p-4 border rounded-2xl">
-                <input id="food-calories" type="number" placeholder="Calories" class="w-full mb-4 p-4 border rounded-2xl">
+                <input id="food-name" type="text" placeholder="Food name" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                <input id="food-calories" type="number" placeholder="Calories" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
                 <label class="flex items-center gap-2 cursor-pointer">
                     <input type="checkbox" id="favorite-food-checkbox" class="w-5 h-5 accent-red-500">
-                    <span class="text-sm">Add to Favorites ❤️</span>
+                    <span class="text-sm dark:text-white">Add to Favorites ❤️</span>
                 </label>
             </div>
-            <div class="flex border-t">
-                <button onclick="hideModal()" class="flex-1 py-5 text-slate-500 font-medium">Cancel</button>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
                 <button onclick="addFood()" class="flex-1 py-5 bg-emerald-600 text-white font-semibold rounded-br-3xl">Add</button>
             </div>
         </div>
@@ -285,21 +270,21 @@
 
     <!-- Exercise Modal -->
     <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-        <div class="bg-white rounded-3xl w-full max-w-md">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
             <div class="p-6">
-                <h3 class="text-xl font-semibold mb-4">Log Exercise</h3>
-                <input id="exercise-name" type="text" placeholder="Activity" class="w-full mb-4 p-4 border rounded-2xl">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">Log Exercise</h3>
+                <input id="exercise-name" type="text" placeholder="Activity" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
                 <div class="grid grid-cols-2 gap-4">
-                    <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border rounded-2xl">
-                    <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border rounded-2xl">
+                    <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                    <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
                 </div>
                 <label class="flex items-center gap-2 cursor-pointer mt-4">
                     <input type="checkbox" id="favorite-exercise-checkbox" class="w-5 h-5 accent-orange-500">
-                    <span class="text-sm">Add to Favorite Exercises</span>
+                    <span class="text-sm dark:text-white">Add to Favorite Exercises</span>
                 </label>
             </div>
-            <div class="flex border-t">
-                <button onclick="hideExerciseModal()" class="flex-1 py-5 text-slate-500 font-medium">Cancel</button>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideExerciseModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
                 <button onclick="addExercise()" class="flex-1 py-5 bg-orange-600 text-white font-semibold rounded-br-3xl">Save</button>
             </div>
         </div>
@@ -321,8 +306,21 @@
 
         const dailyWaterGoal = 3000;
 
+        // Dark Mode Functions
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark') ? 'enabled' : 'disabled');
+        }
+
+        function loadTheme() {
+            if (localStorage.getItem('darkMode') === 'enabled' || 
+                (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+        }
+
         function safeGet(key) {
-            try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } 
+            try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; }
             catch(e) { storageAvailable = false; return null; }
         }
         function safeSet(key, value) {
@@ -365,8 +363,7 @@
 
         function loadProfile() {
             currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '' };
-            const displayName = currentProfile.name || currentUser;
-            document.getElementById('current-user-display').textContent = displayName;
+            document.getElementById('current-user-display').textContent = currentProfile.name || currentUser;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
         }
 
@@ -401,7 +398,6 @@
             alert("✅ Profile updated successfully!");
         }
 
-        // Calendar
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
@@ -447,7 +443,6 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
-        // Water Intake
         function addWater(ml) {
             if (!data.waterEntries) data.waterEntries = [];
             data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
@@ -476,7 +471,7 @@
 
             const container = document.getElementById('water-entries');
             container.innerHTML = (data.waterEntries || []).map((entry, i) => `
-                <div class="flex justify-between items-center bg-blue-50 px-4 py-3 rounded-2xl">
+                <div class="flex justify-between items-center bg-blue-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
                     <div class="flex items-center gap-3">
                         <span class="text-blue-600">💧</span>
                         <div><span class="font-medium">${entry.amount} ml</span> <span class="text-xs text-slate-500">${entry.time}</span></div>
@@ -486,15 +481,14 @@
             `).join('');
         }
 
-        // Favorites, Meals, Exercise, Barcode, RenderAll, etc. (all functions from your code)
         function renderFavoriteFoods() {
             const container = document.getElementById('favorites-food-bar');
             container.innerHTML = favoriteFoods.map((fav, i) => `
-                <div class="group relative bg-white border border-slate-200 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
+                <div class="group relative bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
                     <button onclick="quickAddFavoriteFood(${i})" class="flex-1 text-left">❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span></button>
                     <button onclick="removeFavoriteFood(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
                 </div>
-            `).join('') || '<p class="text-slate-400 text-sm">No favorite foods yet</p>';
+            `).join('') || '<p class="text-slate-400 dark:text-slate-500 text-sm">No favorite foods yet</p>';
         }
 
         function removeFavoriteFood(index) {
@@ -508,11 +502,11 @@
         function renderFavoriteExercises() {
             const container = document.getElementById('favorites-exercise-bar');
             container.innerHTML = favoriteExercises.map((fav, i) => `
-                <div class="group relative bg-white border border-slate-200 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
+                <div class="group relative bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
                     <button onclick="quickAddFavoriteExercise(${i})" class="flex-1 text-left">🏃 ${fav.name} • ${fav.minutes}min</button>
                     <button onclick="removeFavoriteExercise(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
                 </div>
-            `).join('') || '<p class="text-slate-400 text-sm">No favorite exercises yet</p>';
+            `).join('') || '<p class="text-slate-400 dark:text-slate-500 text-sm">No favorite exercises yet</p>';
         }
 
         function removeFavoriteExercise(index) {
@@ -545,13 +539,13 @@
             const list = document.getElementById(meal + '-list');
             const totalEl = document.getElementById(meal + '-total');
             const items = data[meal] || [];
-            let html = items.length === 0 ? `<p class="text-slate-400 text-center py-8">No items yet</p>` : '';
+            let html = items.length === 0 ? `<p class="text-slate-400 dark:text-slate-500 text-center py-8">No items yet</p>` : '';
 
             items.forEach((item, i) => {
                 html += `
-                    <div class="flex justify-between items-center bg-slate-50 px-4 py-3 rounded-2xl">
+                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
                         <div>
-                            <div class="font-medium">${item.name}</div>
+                            <div class="font-medium dark:text-white">${item.name}</div>
                             <div class="text-xs text-slate-400">${item.cal} kcal</div>
                         </div>
                         <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
@@ -567,15 +561,15 @@
             data.exercises.forEach((ex, i) => {
                 const cal = Math.round(ex.minutes * ex.calPerMin);
                 html += `
-                    <div class="flex justify-between items-center bg-orange-50 px-4 py-3 rounded-2xl">
-                        <div>${ex.name} • ${ex.minutes} min</div>
+                    <div class="flex justify-between items-center bg-orange-50 dark:bg-orange-900/30 px-4 py-3 rounded-2xl">
+                        <div class="dark:text-white">${ex.name} • ${ex.minutes} min</div>
                         <div class="flex items-center gap-4">
-                            <span class="font-medium">${cal} kcal</span>
+                            <span class="font-medium dark:text-white">${cal} kcal</span>
                             <button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
                         </div>
                     </div>`;
             });
-            container.innerHTML = html || `<p class="text-slate-400 py-4">No exercises logged</p>`;
+            container.innerHTML = html || `<p class="text-slate-400 dark:text-slate-500 py-4">No exercises logged</p>`;
         }
 
         function calculateTotals() {
@@ -696,10 +690,10 @@
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
 
-            users[user] = { 
-                password: pass, 
-                history: {}, 
-                favoriteFoods: [], 
+            users[user] = {
+                password: pass,
+                history: {},
+                favoriteFoods: [],
                 favoriteExercises: [],
                 profile: { name: user, picture: '' }
             };
@@ -716,7 +710,7 @@
             currentUser = user;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
-            
+           
             loadProfile();
             goToToday();
         }
@@ -807,6 +801,7 @@
 
         window.onload = () => {
             loadUsers();
+            loadTheme();
         };
     </script>
 </body>
