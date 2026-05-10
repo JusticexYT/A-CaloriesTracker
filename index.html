@@ -706,4 +706,50 @@
                     try {
                         const barcodes = await detector.detect(video);
                         if (barcodes.length > 0) {
-                            clear
+                            clearInterval(interval);
+                            await fetchProductInfo(barcodes[0].rawValue);
+                            stopBarcodeScanner();
+                        }
+                    } catch(e) {}
+                }, 400);
+            } else {
+                status.textContent = "Not supported";
+                setTimeout(stopBarcodeScanner, 1500);
+            }
+        }
+
+        async function fetchProductInfo(barcode) {
+            try {
+                const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
+                const json = await res.json();
+                if (json.status === 1 && json.product) {
+                    const p = json.product;
+                    const name = p.product_name || `Product ${barcode}`;
+                    const cal = p.nutriments ? Math.round(p.nutriments['energy-kcal_100g'] || 100) : 100;
+                    const meal = prompt(`Found: ${name}\n~${cal} kcal\nAdd to meal?`, "snacks");
+                    if (meal && ['breakfast','lunch','dinner','snacks'].includes(meal)) {
+                        if (!data[meal]) data[meal] = [];
+                        data[meal].push({name, cal});
+                        renderAll();
+                        saveCurrentData();
+                    }
+                }
+            } catch(e) {}
+        }
+
+        function renderAll() {
+            updateDateDisplay();
+            renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
+            renderExercises();
+            calculateTotals();
+            renderFavoriteFoods();
+            renderFavoriteExercises();
+            renderWater();
+        }
+
+        window.onload = () => {
+            loadUsers();
+        };
+    </script>
+</body>
+</html>
