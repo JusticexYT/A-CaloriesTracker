@@ -15,20 +15,45 @@
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .calendar-day { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
-        .calendar-day:hover { background-color: #ecfdf5; }
-        .calendar-day.today { background-color: #a7f3d0; font-weight: 600; }
-        .calendar-day.selected { background-color: #10b981; color: white; font-weight: 600; }
+        
+        /* Prettier Calendar */
+        .calendar-day { 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 16px;
+            font-size: 15px;
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        .calendar-day:hover { 
+            transform: scale(1.08); 
+            box-shadow: 0 10px 15px -3px rgb(16 185 129 / 0.2);
+        }
+        .calendar-day.today { 
+            background-color: #a7f3d0; 
+            color: #166534; 
+            font-weight: 700; 
+            box-shadow: 0 0 0 3px #10b981 inset;
+        }
+        .calendar-day.selected { 
+            background-color: #10b981; 
+            color: white; 
+            font-weight: 700; 
+            box-shadow: 0 0 0 4px #34d399;
+        }
+        .dark .calendar-day.today { background-color: #10b981; color: white; }
+        .dark .calendar-day.selected { background-color: #34d399; color: black; }
+
         .tab-active { border-bottom: 3px solid #10b981; color: #10b981; font-weight: 600; }
         .avatar { width: 42px; height: 42px; object-fit: cover; border-radius: 9999px; border: 2px solid white; }
         .favorites-scroll { scrollbar-width: none; }
         .favorites-scroll::-webkit-scrollbar { display: none; }
 
-        /* OPTIMIZED THEME SWITCH ANIMATION */
-        html {
-            transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-                        color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        /* Smooth theme switching */
+        html { transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         body, .bg-white, .bg-slate-800, .bg-slate-700, .bg-slate-900,
         .border-slate-200, .border-slate-600, .border-slate-700,
         .text-slate-900, .text-slate-500, .text-white,
@@ -37,12 +62,7 @@
                         border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
                         color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        #water-progress, #progress-bar {
-            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-        button, .rounded-2xl {
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-        }
+        #water-progress, #progress-bar { transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 dark:from-slate-950 dark:to-slate-900 pb-20">
@@ -99,7 +119,7 @@
             <div class="lg:hidden bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-5 mb-6">
                 <div class="flex justify-between mb-4">
                     <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
-                    <h3 id="calendar-title-mobile" class="font-semibold text-lg dark:text-white"></h3>
+                    <h3 id="calendar-title-mobile" class="font-semibold text-lg dark:text-white flex items-center gap-2">📅 <span></span></h3>
                     <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
                 </div>
                 <div class="grid grid-cols-7 text-center text-xs text-slate-500 dark:text-slate-400 mb-2">
@@ -108,113 +128,111 @@
                 <div id="calendar-grid-mobile" class="grid grid-cols-7 gap-1 text-center"></div>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Desktop Calendar -->
-                <div class="hidden lg:block lg:col-span-3 bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-5">
-                    <div class="flex justify-between mb-4">
-                        <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
-                        <h3 id="calendar-title" class="font-semibold text-lg dark:text-white"></h3>
-                        <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
+            <!-- Desktop Calendar -->
+            <div class="hidden lg:block lg:col-span-3 bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-5">
+                <div class="flex justify-between mb-4">
+                    <button onclick="prevMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-left"></i></button>
+                    <h3 id="calendar-title" class="font-semibold text-lg dark:text-white flex items-center gap-2">📅 <span></span></h3>
+                    <button onclick="nextMonth()" class="p-3 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl"><i class="fa-solid fa-chevron-right"></i></button>
+                </div>
+                <div class="grid grid-cols-7 text-center text-xs text-slate-500 dark:text-slate-400 mb-2">
+                    <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                </div>
+                <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-9 space-y-6">
+                <h2 id="selected-date-display" class="text-2xl font-semibold dark:text-white"></h2>
+
+                <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3 text-lg">
+                    <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
+                </button>
+
+                <!-- Water Intake -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-semibold text-lg flex items-center gap-2 dark:text-white"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
+                        <div class="text-sm font-mono font-medium dark:text-white" id="water-total">0 / 3000 ml</div>
                     </div>
-                    <div class="grid grid-cols-7 text-center text-xs text-slate-500 dark:text-slate-400 mb-2">
-                        <div>S</div><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div>
+                    <div class="h-4 bg-blue-100 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
+                        <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
                     </div>
-                    <div id="calendar-grid" class="grid grid-cols-7 gap-1 text-center"></div>
+                    <div class="grid grid-cols-4 gap-3 mb-5">
+                        <button onclick="addWater(250)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+250</button>
+                        <button onclick="addWater(500)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+500</button>
+                        <button onclick="addWater(750)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+750</button>
+                        <button onclick="addWater(1000)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+1000</button>
+                    </div>
+                    <div class="flex gap-3">
+                        <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none dark:bg-slate-700 dark:text-white">
+                        <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl">Add</button>
+                    </div>
+                    <div id="water-entries" class="mt-6 space-y-3 max-h-60 overflow-y-auto"></div>
                 </div>
 
-                <!-- Main Content -->
-                <div class="lg:col-span-9 space-y-6">
-                    <h2 id="selected-date-display" class="text-2xl font-semibold dark:text-white"></h2>
+                <!-- Favorites -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
+                    <h3 class="font-medium mb-4 dark:text-white">❤️ Favorite Foods</h3>
+                    <div id="favorites-food-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
+                    <h3 class="font-medium mt-8 mb-4 dark:text-white">🏃 Favorite Exercises</h3>
+                    <div id="favorites-exercise-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
+                </div>
 
-                    <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3 text-lg">
-                        <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
-                    </button>
-
-                    <!-- Water Intake -->
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="font-semibold text-lg flex items-center gap-2 dark:text-white"><i class="fa-solid fa-glass-water text-blue-500"></i> Water Intake</h3>
-                            <div class="text-sm font-mono font-medium dark:text-white" id="water-total">0 / 3000 ml</div>
-                        </div>
-                        <div class="h-4 bg-blue-100 dark:bg-slate-700 rounded-full overflow-hidden mb-4">
-                            <div id="water-progress" class="h-4 bg-blue-500 rounded-full transition-all"></div>
-                        </div>
-                        <div class="grid grid-cols-4 gap-3 mb-5">
-                            <button onclick="addWater(250)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+250</button>
-                            <button onclick="addWater(500)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+500</button>
-                            <button onclick="addWater(750)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+750</button>
-                            <button onclick="addWater(1000)" class="py-4 bg-blue-50 dark:bg-slate-700 hover:bg-blue-100 dark:hover:bg-slate-600 rounded-2xl text-sm font-medium">+1000</button>
-                        </div>
-                        <div class="flex gap-3">
-                            <input id="water-manual" type="number" placeholder="Custom ml" class="flex-1 px-5 py-4 border dark:border-slate-600 rounded-2xl focus:outline-none dark:bg-slate-700 dark:text-white">
-                            <button onclick="addWaterManual()" class="px-8 bg-blue-600 text-white rounded-2xl">Add</button>
-                        </div>
-                        <div id="water-entries" class="mt-6 space-y-3 max-h-60 overflow-y-auto"></div>
+                <!-- Goal -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
+                    <div class="flex justify-between mb-3">
+                        <span class="font-medium dark:text-white">Daily Calorie Goal</span>
+                        <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none dark:bg-slate-700 dark:text-white">
                     </div>
-
-                    <!-- Favorites -->
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
-                        <h3 class="font-medium mb-4 dark:text-white">❤️ Favorite Foods</h3>
-                        <div id="favorites-food-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
-                        <h3 class="font-medium mt-8 mb-4 dark:text-white">🏃 Favorite Exercises</h3>
-                        <div id="favorites-exercise-bar" class="favorites-scroll flex gap-3 overflow-x-auto pb-4"></div>
+                    <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all"></div>
                     </div>
-
-                    <!-- Goal -->
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl p-6">
-                        <div class="flex justify-between mb-3">
-                            <span class="font-medium dark:text-white">Daily Calorie Goal</span>
-                            <input id="goal-input" type="number" value="2000" oninput="updateGoal()" class="w-24 text-right font-mono text-xl focus:outline-none dark:bg-slate-700 dark:text-white">
-                        </div>
-                        <div class="h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div id="progress-bar" class="h-3 bg-emerald-500 rounded-full transition-all"></div>
-                        </div>
-                        <div class="flex justify-between text-sm mt-2 dark:text-white">
-                            <span id="calories-consumed">0 kcal</span>
-                            <span id="remaining-calories">2000 remaining</span>
-                        </div>
+                    <div class="flex justify-between text-sm mt-2 dark:text-white">
+                        <span id="calories-consumed">0 kcal</span>
+                        <span id="remaining-calories">2000 remaining</span>
                     </div>
+                </div>
 
-                    <!-- Meals -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
-                            <div class="bg-amber-50 dark:bg-amber-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">☀️</span><div><strong class="dark:text-white">Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('breakfast')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
-                            </div>
-                            <div id="breakfast-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                <!-- Meals -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                        <div class="bg-amber-50 dark:bg-amber-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                            <div class="flex items-center gap-3"><span class="text-3xl">☀️</span><div><strong class="dark:text-white">Breakfast</strong><br><span id="breakfast-total" class="text-emerald-600">0 kcal</span></div></div>
+                            <button onclick="showAddModal('breakfast')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
                         </div>
-                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
-                            <div class="bg-blue-50 dark:bg-blue-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">🍲</span><div><strong class="dark:text-white">Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('lunch')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
-                            </div>
-                            <div id="lunch-list" class="p-5 space-y-3 min-h-[120px]"></div>
-                        </div>
-                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
-                            <div class="bg-indigo-50 dark:bg-indigo-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">🌙</span><div><strong class="dark:text-white">Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('dinner')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
-                            </div>
-                            <div id="dinner-list" class="p-5 space-y-3 min-h-[120px]"></div>
-                        </div>
-                        <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
-                            <div class="bg-pink-50 dark:bg-pink-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
-                                <div class="flex items-center gap-3"><span class="text-3xl">🍪</span><div><strong class="dark:text-white">Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div></div>
-                                <button onclick="showAddModal('snacks')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
-                            </div>
-                            <div id="snacks-list" class="p-5 space-y-3 min-h-[120px]"></div>
-                        </div>
+                        <div id="breakfast-list" class="p-5 space-y-3 min-h-[120px]"></div>
                     </div>
+                    <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                        <div class="bg-blue-50 dark:bg-blue-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                            <div class="flex items-center gap-3"><span class="text-3xl">🍲</span><div><strong class="dark:text-white">Lunch</strong><br><span id="lunch-total" class="text-emerald-600">0 kcal</span></div></div>
+                            <button onclick="showAddModal('lunch')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
+                        </div>
+                        <div id="lunch-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                    </div>
+                    <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                        <div class="bg-indigo-50 dark:bg-indigo-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                            <div class="flex items-center gap-3"><span class="text-3xl">🌙</span><div><strong class="dark:text-white">Dinner</strong><br><span id="dinner-total" class="text-emerald-600">0 kcal</span></div></div>
+                            <button onclick="showAddModal('dinner')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
+                        </div>
+                        <div id="dinner-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                    </div>
+                    <div class="meal-card bg-white dark:bg-slate-800 rounded-3xl shadow-sm">
+                        <div class="bg-pink-50 dark:bg-pink-900/30 px-5 py-4 flex justify-between items-center rounded-t-3xl">
+                            <div class="flex items-center gap-3"><span class="text-3xl">🍪</span><div><strong class="dark:text-white">Snacks</strong><br><span id="snacks-total" class="text-emerald-600">0 kcal</span></div></div>
+                            <button onclick="showAddModal('snacks')" class="p-3 bg-white dark:bg-slate-700 rounded-2xl shadow text-xl">＋</button>
+                        </div>
+                        <div id="snacks-list" class="p-5 space-y-3 min-h-[120px]"></div>
+                    </div>
+                </div>
 
-                    <!-- Exercise -->
-                    <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
-                        <div class="flex justify-between items-center mb-4">
-                            <strong class="text-lg dark:text-white">Exercise</strong>
-                            <button onclick="showExerciseModal()" class="px-6 py-2.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-2xl text-sm font-medium">+ Add Exercise</button>
-                        </div>
-                        <div id="exercise-list" class="space-y-3"></div>
+                <!-- Exercise -->
+                <div class="bg-white dark:bg-slate-800 rounded-3xl shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <strong class="text-lg dark:text-white">Exercise</strong>
+                        <button onclick="showExerciseModal()" class="px-6 py-2.5 bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 rounded-2xl text-sm font-medium">+ Add Exercise</button>
                     </div>
+                    <div id="exercise-list" class="space-y-3"></div>
                 </div>
             </div>
         </div>
@@ -325,13 +343,8 @@
             try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) {}
         }
 
-        function loadUsers() { 
-            const saved = safeGet('caltrack_users'); 
-            if(saved) users = saved; 
-        }
-        function saveUsers() { 
-            safeSet('caltrack_users', users); 
-        }
+        function loadUsers() { const saved = safeGet('caltrack_users'); if(saved) users = saved; }
+        function saveUsers() { safeSet('caltrack_users', users); }
 
         function getDateData(date) {
             if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: currentUser, picture: '', darkMode: false } };
@@ -367,12 +380,8 @@
             currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '', darkMode: false };
             document.getElementById('current-user-display').textContent = currentProfile.name || currentUser;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
-
-            if (currentProfile.darkMode) {
-                document.documentElement.classList.add('dark');
-            } else {
-                document.documentElement.classList.remove('dark');
-            }
+            if (currentProfile.darkMode) document.documentElement.classList.add('dark');
+            else document.documentElement.classList.remove('dark');
         }
 
         function showProfileModal() {
@@ -380,10 +389,7 @@
             document.getElementById('profile-avatar').src = currentProfile.picture || 'https://via.placeholder.com/120';
             document.getElementById('profile-modal').classList.remove('hidden');
         }
-
-        function hideProfileModal() {
-            document.getElementById('profile-modal').classList.add('hidden');
-        }
+        function hideProfileModal() { document.getElementById('profile-modal').classList.add('hidden'); }
 
         function uploadProfilePicture(e) {
             const file = e.target.files[0];
@@ -409,39 +415,49 @@
         function toggleDarkMode() {
             const html = document.documentElement;
             html.style.transition = 'background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
-            
             const isDark = html.classList.toggle('dark');
             currentProfile.darkMode = isDark;
-            
             if (currentUser && users[currentUser]) {
                 users[currentUser].profile = currentProfile;
                 saveUsers();
             }
-            
             setTimeout(() => { html.style.transition = ''; }, 300);
         }
 
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
-            grid.innerHTML = '';
-            document.getElementById('calendar-title').textContent = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+            const mobileGrid = document.getElementById('calendar-grid-mobile');
+            const title = document.getElementById('calendar-title');
+            const mobileTitle = document.getElementById('calendar-title-mobile');
+
+            const monthName = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+            title.innerHTML = `📅 ${monthName}`;
+            mobileTitle.innerHTML = `📅 ${monthName}`;
+
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
             const todayStr = new Date().toISOString().split('T')[0];
-            for (let i = 0; i < firstDay; i++) grid.innerHTML += `<div></div>`;
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const div = document.createElement('div');
-                div.className = `calendar-day py-3 rounded-2xl cursor-pointer text-sm ${dateStr === todayStr ? 'today' : ''} ${dateStr === currentDate ? 'selected' : ''}`;
-                div.textContent = day;
-                div.onclick = () => {
-                    currentDate = dateStr;
-                    loadCurrentData();
-                    renderAll();
-                    renderCalendar();
-                };
-                grid.appendChild(div);
-            }
+
+            const renderGrid = (target) => {
+                target.innerHTML = '';
+                for (let i = 0; i < firstDay; i++) target.innerHTML += `<div></div>`;
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const div = document.createElement('div');
+                    div.className = `calendar-day ${dateStr === todayStr ? 'today' : ''} ${dateStr === currentDate ? 'selected' : ''}`;
+                    div.textContent = day;
+                    div.onclick = () => {
+                        currentDate = dateStr;
+                        loadCurrentData();
+                        renderAll();
+                        renderCalendar();
+                    };
+                    target.appendChild(div);
+                }
+            };
+
+            renderGrid(grid);
+            renderGrid(mobileGrid);
         }
 
         function prevMonth() { currentMonth--; if(currentMonth < 0){currentMonth=11; currentYear--;} renderCalendar(); }
@@ -469,12 +485,10 @@
             renderWater();
             saveCurrentData();
         }
-
         function addWaterManual() {
             const ml = parseInt(document.getElementById('water-manual').value);
             if (ml > 0) addWater(ml);
         }
-
         function removeWater(index) {
             if (confirm("Remove this water entry?")) {
                 data.waterEntries.splice(index, 1);
@@ -482,22 +496,16 @@
                 saveCurrentData();
             }
         }
-
         function renderWater() {
             const total = (data.waterEntries || []).reduce((sum, e) => sum + e.amount, 0);
             document.getElementById('water-total').textContent = `${total} / ${dailyWaterGoal} ml`;
-            const percent = Math.min((total / dailyWaterGoal) * 100, 100);
-            document.getElementById('water-progress').style.width = percent + '%';
+            document.getElementById('water-progress').style.width = Math.min((total / dailyWaterGoal) * 100, 100) + '%';
             const container = document.getElementById('water-entries');
             container.innerHTML = (data.waterEntries || []).map((entry, i) => `
                 <div class="flex justify-between items-center bg-blue-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
-                    <div class="flex items-center gap-3">
-                        <span class="text-blue-600">💧</span>
-                        <div><span class="font-medium">${entry.amount} ml</span> <span class="text-xs text-slate-500">${entry.time}</span></div>
-                    </div>
+                    <div class="flex items-center gap-3"><span class="text-blue-600">💧</span><div><span class="font-medium">${entry.amount} ml</span> <span class="text-xs text-slate-500">${entry.time}</span></div></div>
                     <button onclick="removeWater(${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `).join('');
+                </div>`).join('');
         }
 
         function renderFavoriteFoods() {
@@ -506,10 +514,8 @@
                 <div class="group relative bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
                     <button onclick="quickAddFavoriteFood(${i})" class="flex-1 text-left">❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span></button>
                     <button onclick="removeFavoriteFood(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `).join('') || '<p class="text-slate-400 dark:text-slate-500 text-sm">No favorite foods yet</p>';
+                </div>`).join('') || '<p class="text-slate-400 dark:text-slate-500 text-sm">No favorite foods yet</p>';
         }
-
         function removeFavoriteFood(index) {
             if (confirm("Remove this favorite food?")) {
                 favoriteFoods.splice(index, 1);
@@ -517,17 +523,14 @@
                 renderFavoriteFoods();
             }
         }
-
         function renderFavoriteExercises() {
             const container = document.getElementById('favorites-exercise-bar');
             container.innerHTML = favoriteExercises.map((fav, i) => `
                 <div class="group relative bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-orange-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
                     <button onclick="quickAddFavoriteExercise(${i})" class="flex-1 text-left">🏃 ${fav.name} • ${fav.minutes}min</button>
                     <button onclick="removeFavoriteExercise(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
-                </div>
-            `).join('') || '<p class="text-slate-400 dark:text-slate-500 text-sm">No favorite exercises yet</p>';
+                </div>`).join('') || '<p class="text-slate-400 dark:text-slate-500 text-sm">No favorite exercises yet</p>';
         }
-
         function removeFavoriteExercise(index) {
             if (confirm("Remove this favorite exercise?")) {
                 favoriteExercises.splice(index, 1);
@@ -535,7 +538,6 @@
                 renderFavoriteExercises();
             }
         }
-
         function quickAddFavoriteFood(i) {
             const fav = favoriteFoods[i];
             const meal = prompt("Add to which meal?", "snacks");
@@ -545,7 +547,6 @@
             renderAll();
             saveCurrentData();
         }
-
         function quickAddFavoriteExercise(i) {
             const fav = favoriteExercises[i];
             if (!data.exercises) data.exercises = [];
@@ -560,14 +561,7 @@
             const items = data[meal] || [];
             let html = items.length === 0 ? `<p class="text-slate-400 dark:text-slate-500 text-center py-8">No items yet</p>` : '';
             items.forEach((item, i) => {
-                html += `
-                    <div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
-                        <div>
-                            <div class="font-medium dark:text-white">${item.name}</div>
-                            <div class="text-xs text-slate-400">${item.cal} kcal</div>
-                        </div>
-                        <button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
-                    </div>`;
+                html += `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 px-4 py-3 rounded-2xl"><div><div class="font-medium dark:text-white">${item.name}</div><div class="text-xs text-slate-400">${item.cal} kcal</div></div><button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button></div>`;
             });
             list.innerHTML = html;
             totalEl.textContent = items.reduce((sum, it) => sum + it.cal, 0) + ' kcal';
@@ -578,14 +572,7 @@
             let html = '';
             data.exercises.forEach((ex, i) => {
                 const cal = Math.round(ex.minutes * ex.calPerMin);
-                html += `
-                    <div class="flex justify-between items-center bg-orange-50 dark:bg-orange-900/30 px-4 py-3 rounded-2xl">
-                        <div class="dark:text-white">${ex.name} • ${ex.minutes} min</div>
-                        <div class="flex items-center gap-4">
-                            <span class="font-medium dark:text-white">${cal} kcal</span>
-                            <button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button>
-                        </div>
-                    </div>`;
+                html += `<div class="flex justify-between items-center bg-orange-50 dark:bg-orange-900/30 px-4 py-3 rounded-2xl"><div class="dark:text-white">${ex.name} • ${ex.minutes} min</div><div class="flex items-center gap-4"><span class="font-medium dark:text-white">${cal} kcal</span><button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`;
             });
             container.innerHTML = html || `<p class="text-slate-400 dark:text-slate-500 py-4">No exercises logged</p>`;
         }
@@ -625,15 +612,11 @@
             if (!name || !cal) return alert("Please enter food name and calories");
             if (!data[currentMealType]) data[currentMealType] = [];
             data[currentMealType].push({name, cal});
-            if (isFavorite) {
-                favoriteFoods.push({name, cal});
-                saveFavorites();
-            }
+            if (isFavorite) { favoriteFoods.push({name, cal}); saveFavorites(); }
             hideModal();
             renderAll();
             saveCurrentData();
         }
-
         function removeFood(meal, index) {
             if (confirm("Delete this item?")) {
                 data[meal].splice(index, 1);
@@ -658,15 +641,11 @@
             const isFavorite = document.getElementById('favorite-exercise-checkbox').checked;
             if (!name || !minutes || !calPerMin) return alert("Please fill all fields");
             data.exercises.push({name, minutes, calPerMin});
-            if (isFavorite) {
-                favoriteExercises.push({name, minutes, calPerMin});
-                saveFavorites();
-            }
+            if (isFavorite) { favoriteExercises.push({name, minutes, calPerMin}); saveFavorites(); }
             hideExerciseModal();
             renderAll();
             saveCurrentData();
         }
-
         function removeExercise(i) {
             if (confirm("Delete this exercise?")) {
                 data.exercises.splice(i, 1);
@@ -687,7 +666,6 @@
             document.getElementById('tab-login').classList.add('tab-active');
             document.getElementById('tab-signup').classList.remove('tab-active');
         }
-
         function showSignupForm() {
             document.getElementById('login-form').classList.add('hidden');
             document.getElementById('signup-form').classList.remove('hidden');
@@ -700,13 +678,7 @@
             const pass = document.getElementById('signup-password').value;
             if (!user || !pass) return alert("Please fill both fields");
             if (users[user]) return alert("Username already taken");
-            users[user] = {
-                password: pass,
-                history: {},
-                favoriteFoods: [],
-                favoriteExercises: [],
-                profile: { name: user, picture: '', darkMode: false }
-            };
+            users[user] = { password: pass, history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: user, picture: '', darkMode: false } };
             saveUsers();
             alert("Account created! Please login.");
             showLoginForm();
@@ -731,6 +703,7 @@
             }
         }
 
+        // Barcode Scanner
         async function startBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.remove('hidden');
@@ -740,18 +713,13 @@
                 video.srcObject = videoStream;
                 video.play();
                 detectBarcode(video);
-            } catch(e) {
-                alert("Camera access failed.");
-                stopBarcodeScanner();
-            }
+            } catch(e) { alert("Camera access failed."); stopBarcodeScanner(); }
         }
-
         function stopBarcodeScanner() {
             const modal = document.getElementById('barcode-modal');
             modal.classList.add('hidden');
             if (videoStream) videoStream.getTracks().forEach(track => track.stop());
         }
-
         async function detectBarcode(video) {
             const status = document.getElementById('scan-status');
             if ('BarcodeDetector' in window) {
@@ -771,7 +739,6 @@
                 setTimeout(stopBarcodeScanner, 2000);
             }
         }
-
         async function fetchProductInfo(barcode) {
             try {
                 const res = await fetch(`https://world.openfoodfacts.org/api/v0/product/${barcode}.json`);
