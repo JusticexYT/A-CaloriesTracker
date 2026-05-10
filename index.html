@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -23,12 +23,6 @@
         .avatar { width: 42px; height: 42px; object-fit: cover; border-radius: 9999px; border: 2px solid white; }
         .favorites-scroll { scrollbar-width: none; }
         .favorites-scroll::-webkit-scrollbar { display: none; }
-
-        /* Dark Mode Enhancements */
-        .dark .calendar-day:hover { background-color: #334155; }
-        .dark .calendar-day.today { background-color: #10b981; color: white; }
-        .dark .calendar-day.selected { background-color: #34d399; color: black; }
-        .dark .meal-card { background-color: #1e2937; }
     </style>
 </head>
 <body class="min-h-screen bg-gradient-to-br from-sky-50 to-emerald-50 dark:from-slate-950 dark:to-slate-900 pb-20">
@@ -60,7 +54,6 @@
 
     <!-- Main App -->
     <div id="main-app" class="hidden">
-        <!-- Top Bar -->
         <div class="sticky top-0 bg-white dark:bg-slate-900 border-b dark:border-slate-700 z-50 px-4 py-4">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
                 <div onclick="showProfileModal()" class="flex items-center gap-3 cursor-pointer">
@@ -114,7 +107,6 @@
                 <div class="lg:col-span-9 space-y-6">
                     <h2 id="selected-date-display" class="text-2xl font-semibold dark:text-white"></h2>
 
-                    <!-- Barcode Scanner -->
                     <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3 text-lg">
                         <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
                     </button>
@@ -302,37 +294,28 @@
         let favoriteExercises = [];
         let storageAvailable = true;
         let videoStream = null;
-        let currentProfile = { name: '', picture: '' };
+        let currentProfile = { name: '', picture: '', darkMode: false };
 
         const dailyWaterGoal = 3000;
 
-        // Dark Mode Functions
-        function toggleDarkMode() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('darkMode', document.documentElement.classList.contains('dark') ? 'enabled' : 'disabled');
-        }
-
-        function loadTheme() {
-            if (localStorage.getItem('darkMode') === 'enabled' || 
-                (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-                document.documentElement.classList.add('dark');
-            }
-        }
-
         function safeGet(key) {
             try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; }
-            catch(e) { storageAvailable = false; return null; }
+            catch(e) { return null; }
         }
         function safeSet(key, value) {
-            try { localStorage.setItem(key, JSON.stringify(value)); } 
-            catch(e) { storageAvailable = false; }
+            try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) {}
         }
 
-        function loadUsers() { const saved = safeGet('caltrack_users'); if(saved) users = saved; }
-        function saveUsers() { if(storageAvailable) safeSet('caltrack_users', users); }
+        function loadUsers() { 
+            const saved = safeGet('caltrack_users'); 
+            if(saved) users = saved; 
+        }
+        function saveUsers() { 
+            safeSet('caltrack_users', users); 
+        }
 
         function getDateData(date) {
-            if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: currentUser, picture: '' } };
+            if (!users[currentUser]) users[currentUser] = { history: {}, favoriteFoods: [], favoriteExercises: [], profile: { name: currentUser, picture: '', darkMode: false } };
             if (!users[currentUser].history[date]) {
                 users[currentUser].history[date] = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
             }
@@ -362,9 +345,16 @@
         }
 
         function loadProfile() {
-            currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '' };
+            currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '', darkMode: false };
             document.getElementById('current-user-display').textContent = currentProfile.name || currentUser;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
+
+            // Apply user's saved dark mode preference
+            if (currentProfile.darkMode) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
         }
 
         function showProfileModal() {
@@ -398,6 +388,16 @@
             alert("✅ Profile updated successfully!");
         }
 
+        function toggleDarkMode() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            currentProfile.darkMode = isDark;
+            if (currentUser && users[currentUser]) {
+                users[currentUser].profile = currentProfile;
+                saveUsers();
+            }
+        }
+
+        // Calendar, Water, Favorites, Meals, Exercise, Barcode, etc. (all functions from your last version)
         function renderCalendar() {
             const grid = document.getElementById('calendar-grid');
             grid.innerHTML = '';
@@ -695,7 +695,7 @@
                 history: {},
                 favoriteFoods: [],
                 favoriteExercises: [],
-                profile: { name: user, picture: '' }
+                profile: { name: user, picture: '', darkMode: false }
             };
             saveUsers();
             alert("Account created! Please login.");
