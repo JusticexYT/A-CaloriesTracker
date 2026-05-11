@@ -344,7 +344,7 @@
         </div>
     </div>
 
-    <!-- Settings Modal (exactly as before + all 10 new customization sections) -->
+    <!-- Settings Modal (exactly as before + all new customization sections) -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[110] p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
             <div class="px-8 py-6 border-b dark:border-slate-700 flex items-center justify-between flex-shrink-0">
@@ -503,8 +503,7 @@
         </div>
     </div>
 
-    <!-- All other modals are exactly as in your original file -->
-    <!-- Barcode Modal -->
+    <!-- Barcode Modal (exactly as before) -->
     <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[200] flex flex-col">
         <div class="p-4 flex justify-between text-white">
             <h3 class="font-semibold">Scan Barcode</h3>
@@ -514,7 +513,7 @@
         <div id="scan-status" class="p-4 text-white text-center">Point camera at barcode...</div>
     </div>
 
-    <!-- Food Modal -->
+    <!-- Food Modal (exactly as before) -->
     <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
             <div class="p-6">
@@ -546,9 +545,79 @@
         </div>
     </div>
 
-    <!-- Exercise, Repeat, Weekly, Food Search, AI modals are exactly as you pasted -->
+    <!-- Exercise Modal (exactly as before) -->
+    <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">Log Exercise</h3>
+                <input id="exercise-name" type="text" placeholder="Activity" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                    <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer mt-4">
+                    <input type="checkbox" id="favorite-exercise-checkbox" class="w-5 h-5 accent-orange-500">
+                    <span class="text-sm dark:text-white">Add to Favorite Exercises</span>
+                </label>
+            </div>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideExerciseModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
+                <button onclick="addExercise()" class="flex-1 py-5 accent-btn text-white font-semibold rounded-br-3xl">Save</button>
+            </div>
+        </div>
+    </div>
 
-    <!-- The full script with all original functions + new customization functions added at the end -->
+    <!-- Repeat Last Meal Modal (exactly as before) -->
+    <div id="repeat-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">Repeat Last Meal</h3>
+                <div id="repeat-options" class="space-y-3"></div>
+            </div>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideRepeatModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Weekly Summary Modal (exactly as before) -->
+    <div id="weekly-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[120] p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-2xl max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
+            <div class="px-8 py-6 border-b dark:border-slate-700 flex-shrink-0">
+                <h3 class="text-2xl font-bold">Weekly Summary</h3>
+                <button onclick="hideWeeklyModal()" class="absolute top-6 right-8 text-3xl">✕</button>
+            </div>
+            <div id="weekly-content" class="p-8 overflow-y-auto flex-1"></div>
+        </div>
+    </div>
+
+    <!-- Food Search Modal (exactly as before) -->
+    <div id="food-search-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">Search Food Database</h3>
+                <input id="food-search-input" type="text" placeholder="Type food name..." class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white" onkeyup="filterFoodDatabase()">
+                <div id="food-search-results" class="max-h-80 overflow-y-auto space-y-2"></div>
+            </div>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideFoodSearchModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Suggestions Modal (exactly as before) -->
+    <div id="ai-suggestions-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">AI Meal Suggestions</h3>
+                <div id="ai-suggestions-list" class="space-y-3"></div>
+            </div>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideAISuggestionsModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let currentUser = null;
         let users = {};
