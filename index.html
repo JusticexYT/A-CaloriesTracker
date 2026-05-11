@@ -499,9 +499,8 @@
                 target.innerHTML = '';
                 for (let i = 0; i < firstDay; i++) target.innerHTML += `<div></div>`;
                 for (let day = 1; day <= daysInMonth; day++) {
-                    // FIXED: Use explicit local Date to avoid timezone off-by-one
-                    const dateObj = new Date(currentYear, currentMonth, day);
-                    const dateStr = dateObj.toISOString().split('T')[0];
+                    // FIXED: Pure local date string - no UTC conversion
+                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const div = document.createElement('div');
                     div.className = `calendar-day ${dateStr === todayStr ? 'today' : ''} ${dateStr === currentDate ? 'selected' : ''}`;
                     div.textContent = day;
@@ -523,7 +522,7 @@
 
         function goToToday() {
             const now = new Date();
-            currentDate = now.toISOString().split('T')[0];
+            currentDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             currentMonth = now.getMonth();
             currentYear = now.getFullYear();
             loadCurrentData();
