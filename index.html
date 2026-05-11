@@ -256,7 +256,7 @@
         </div>
     </div>
 
-    <!-- Full Customization Settings Modal -->
+    <!-- Settings Modal (Customize Everything) -->
     <div id="settings-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-[110] p-4">
         <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
             <div class="px-8 py-6 border-b dark:border-slate-700 flex items-center justify-between flex-shrink-0">
@@ -327,11 +327,64 @@
         </div>
     </div>
 
-    <!-- Barcode, Food, Exercise, Profile modals (unchanged and working) -->
-    <!-- [The full modals for barcode, food, exercise, and profile are included exactly as in the previous working version] -->
+    <!-- Barcode Modal -->
+    <div id="barcode-modal" class="hidden fixed inset-0 bg-black z-[200] flex flex-col">
+        <div class="p-4 flex justify-between text-white">
+            <h3 class="font-semibold">Scan Barcode</h3>
+            <button onclick="stopBarcodeScanner()" class="text-3xl">✕</button>
+        </div>
+        <video id="video" class="flex-1 bg-black"></video>
+        <div id="scan-status" class="p-4 text-white text-center">Point camera at barcode...</div>
+    </div>
+
+    <!-- Food Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">Add Food</h3>
+                <select id="meal-type" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                    <option value="breakfast">Breakfast</option>
+                    <option value="lunch">Lunch</option>
+                    <option value="dinner">Dinner</option>
+                    <option value="snacks">Snacks</option>
+                </select>
+                <input id="food-name" type="text" placeholder="Food name" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                <input id="food-calories" type="number" placeholder="Calories" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="favorite-food-checkbox" class="w-5 h-5 accent-red-500">
+                    <span class="text-sm dark:text-white">Add to Favorites ❤️</span>
+                </label>
+            </div>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
+                <button onclick="addFood()" class="flex-1 py-5 accent-btn text-white font-semibold rounded-br-3xl">Add</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exercise Modal -->
+    <div id="exercise-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-md">
+            <div class="p-6">
+                <h3 class="text-xl font-semibold mb-4 dark:text-white">Log Exercise</h3>
+                <input id="exercise-name" type="text" placeholder="Activity" class="w-full mb-4 p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                <div class="grid grid-cols-2 gap-4">
+                    <input id="exercise-minutes" type="number" value="30" placeholder="Minutes" class="p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                    <input id="cal-per-min" type="number" value="10" placeholder="kcal/min" class="p-4 border dark:border-slate-600 rounded-2xl dark:bg-slate-700 dark:text-white">
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer mt-4">
+                    <input type="checkbox" id="favorite-exercise-checkbox" class="w-5 h-5 accent-orange-500">
+                    <span class="text-sm dark:text-white">Add to Favorite Exercises</span>
+                </label>
+            </div>
+            <div class="flex border-t dark:border-slate-600">
+                <button onclick="hideExerciseModal()" class="flex-1 py-5 text-slate-500 dark:text-slate-400 font-medium">Cancel</button>
+                <button onclick="addExercise()" class="flex-1 py-5 accent-btn text-white font-semibold rounded-br-3xl">Save</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Full working JavaScript with all features and fixes
         let currentUser = null;
         let users = {};
         let currentDate = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
@@ -344,12 +397,7 @@
         let videoStream = null;
         let currentProfile = { name: '', picture: '', darkMode: false, waterGoal: 3000, kcalPerMin: 10, accent: 'emerald', showArubaTime: true, showFavorites: true, showExercise: true };
 
-        const accentColors = {
-            emerald: '#10b981',
-            violet: '#8b5cf6',
-            rose: '#ec4899',
-            amber: '#f59e0b'
-        };
+        const accentColors = { emerald: '#10b981', violet: '#8b5cf6', rose: '#ec4899', amber: '#f59e0b' };
 
         function safeGet(key) { try { return localStorage.getItem(key) ? JSON.parse(localStorage.getItem(key)) : null; } catch(e) { return null; } }
         function safeSet(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch(e) {} }
