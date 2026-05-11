@@ -127,6 +127,12 @@
             <!-- Main Content -->
             <div class="lg:col-span-9 space-y-6">
                 <h2 id="selected-date-display" class="text-2xl font-semibold dark:text-white"></h2>
+                
+                <!-- NEW: Atlantic Standard Time Display -->
+                <div id="current-ast-time" class="text-sm font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2.5 rounded-2xl w-fit">
+                    <i class="fa-solid fa-clock"></i>
+                    <span></span>
+                </div>
 
                 <button onclick="startBarcodeScanner()" class="w-full py-5 bg-violet-600 hover:bg-violet-700 text-white font-semibold rounded-3xl flex items-center justify-center gap-3 text-lg">
                     <i class="fa-solid fa-barcode text-3xl"></i> Scan Barcode
@@ -528,6 +534,23 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
+        // NEW: Live Atlantic Standard Time Display
+        function updateCurrentASTTime() {
+            const astOptions = {
+                timeZone: 'America/Halifax',
+                weekday: 'long',
+                month: 'long',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            };
+            const nowAST = new Date().toLocaleString('en-US', astOptions);
+            const timeEl = document.getElementById('current-ast-time');
+            timeEl.innerHTML = `<i class="fa-solid fa-clock"></i> Today: ${nowAST} AST`;
+        }
+
         function addWater(ml) {
             if (!data.waterEntries) data.waterEntries = [];
             data.waterEntries.push({ amount: ml, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
@@ -725,6 +748,7 @@
             document.getElementById('main-app').classList.remove('hidden');
             loadProfile();
             goToToday();
+            updateCurrentASTTime(); // Start live clock immediately
         }
 
         function logout() {
@@ -796,6 +820,9 @@
 
         window.onload = () => {
             loadUsers();
+            // Start live AST clock
+            updateCurrentASTTime();
+            setInterval(updateCurrentASTTime, 60000); // update every minute
         };
     </script>
 </body>
