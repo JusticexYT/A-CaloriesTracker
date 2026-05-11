@@ -128,8 +128,8 @@
             <div class="lg:col-span-9 space-y-6">
                 <h2 id="selected-date-display" class="text-2xl font-semibold dark:text-white"></h2>
                 
-                <!-- NEW: Atlantic Standard Time Display -->
-                <div id="current-ast-time" class="text-sm font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2.5 rounded-2xl w-fit">
+                <!-- Aruba Time Display -->
+                <div id="current-aruba-time" class="text-sm font-medium text-emerald-700 dark:text-emerald-400 flex items-center gap-2 bg-emerald-50 dark:bg-emerald-900/30 px-4 py-2.5 rounded-2xl w-fit">
                     <i class="fa-solid fa-clock"></i>
                     <span></span>
                 </div>
@@ -534,10 +534,10 @@
             document.getElementById('selected-date-display').textContent = d.toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
         }
 
-        // NEW: Live Atlantic Standard Time Display
-        function updateCurrentASTTime() {
-            const astOptions = {
-                timeZone: 'America/Halifax',
+        // Live Aruba Time Display
+        function updateArubaTime() {
+            const options = {
+                timeZone: 'America/Aruba',
                 weekday: 'long',
                 month: 'long',
                 day: 'numeric',
@@ -546,9 +546,9 @@
                 minute: '2-digit',
                 hour12: true
             };
-            const nowAST = new Date().toLocaleString('en-US', astOptions);
-            const timeEl = document.getElementById('current-ast-time');
-            timeEl.innerHTML = `<i class="fa-solid fa-clock"></i> Today: ${nowAST} AST`;
+            const nowAruba = new Date().toLocaleString('en-US', options);
+            const timeEl = document.getElementById('current-aruba-time');
+            timeEl.innerHTML = `<i class="fa-solid fa-clock"></i> Today: ${nowAruba} Aruba Time`;
         }
 
         function addWater(ml) {
@@ -748,7 +748,7 @@
             document.getElementById('main-app').classList.remove('hidden');
             loadProfile();
             goToToday();
-            updateCurrentASTTime(); // Start live clock immediately
+            updateArubaTime(); // Start live Aruba clock
         }
 
         function logout() {
@@ -820,9 +820,9 @@
 
         window.onload = () => {
             loadUsers();
-            // Start live AST clock
-            updateCurrentASTTime();
-            setInterval(updateCurrentASTTime, 60000); // update every minute
+            // Start live Aruba clock
+            updateArubaTime();
+            setInterval(updateArubaTime, 60000); // update every minute
         };
     </script>
 </body>
