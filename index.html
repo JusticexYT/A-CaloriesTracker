@@ -6,17 +6,13 @@
     <title>CalTrack</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        tailwind.config = { 
-            content: [],
-            darkMode: 'class'
-        };
+        tailwind.config = { content: [], darkMode: 'class' };
     </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <style>
         body { font-family: 'Inter', system-ui, sans-serif; }
         .meal-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         
-        /* Prettier Calendar */
         .calendar-day { 
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
             height: 56px;
@@ -39,7 +35,6 @@
         .favorites-scroll { scrollbar-width: none; }
         .favorites-scroll::-webkit-scrollbar { display: none; }
 
-        /* Smooth theme animation */
         html { transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), color 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         body, .bg-white, .bg-slate-800, .bg-slate-700, .bg-slate-900,
         .border-slate-200, .border-slate-600, .border-slate-700,
@@ -91,9 +86,7 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="showSettingsModal()" class="p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                        <i class="fa-solid fa-gear text-xl"></i>
-                    </button>
+                    <button onclick="showSettingsModal()" class="p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"><i class="fa-solid fa-gear text-xl"></i></button>
                     <button onclick="toggleDarkMode()" class="p-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                         <i id="theme-icon-moon" class="fa-solid fa-moon text-xl dark:hidden"></i>
                         <i id="theme-icon-sun" class="fa-solid fa-sun text-xl hidden dark:block"></i>
@@ -355,14 +348,13 @@
     <script>
         let currentUser = null;
         let users = {};
-        let currentDate = new Date().toISOString().split('T')[0];
+        let currentDate = `\( {new Date().getFullYear()}- \){String(new Date().getMonth() + 1).padStart(2, '0')}-${String(new Date().getDate()).padStart(2, '0')}`;
         let currentMonth = new Date().getMonth();
         let currentYear = new Date().getFullYear();
 
         let data = { goal: 2000, breakfast: [], lunch: [], dinner: [], snacks: [], exercises: [], waterEntries: [] };
         let favoriteFoods = [];
         let favoriteExercises = [];
-        let storageAvailable = true;
         let videoStream = null;
         let currentProfile = { name: '', picture: '', darkMode: false, waterGoal: 3000, kcalPerMin: 10 };
 
@@ -401,8 +393,7 @@
             currentProfile = users[currentUser]?.profile || { name: currentUser, picture: '', darkMode: false, waterGoal: 3000, kcalPerMin: 10 };
             document.getElementById('current-user-display').textContent = currentProfile.name || currentUser;
             document.getElementById('header-avatar').src = currentProfile.picture || 'https://via.placeholder.com/42';
-            if (currentProfile.darkMode) document.documentElement.classList.add('dark');
-            else document.documentElement.classList.remove('dark');
+            document.documentElement.classList.toggle('dark', currentProfile.darkMode);
         }
 
         function showProfileModal() {
@@ -493,14 +484,15 @@
 
             const firstDay = new Date(currentYear, currentMonth, 1).getDay();
             const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
-            const todayStr = new Date().toISOString().split('T')[0];
+
+            const today = new Date();
+            const todayStr = `\( {today.getFullYear()}- \){String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
             const renderGrid = (target) => {
                 target.innerHTML = '';
                 for (let i = 0; i < firstDay; i++) target.innerHTML += `<div></div>`;
                 for (let day = 1; day <= daysInMonth; day++) {
-                    // FIXED: Pure local date string - no UTC conversion
-                    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const dateStr = `\( {currentYear}- \){String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     const div = document.createElement('div');
                     div.className = `calendar-day ${dateStr === todayStr ? 'today' : ''} ${dateStr === currentDate ? 'selected' : ''}`;
                     div.textContent = day;
@@ -522,7 +514,7 @@
 
         function goToToday() {
             const now = new Date();
-            currentDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            currentDate = `\( {now.getFullYear()}- \){String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
             currentMonth = now.getMonth();
             currentYear = now.getFullYear();
             loadCurrentData();
@@ -556,12 +548,12 @@
         function renderWater() {
             const goal = currentProfile.waterGoal || 3000;
             const total = (data.waterEntries || []).reduce((sum, e) => sum + e.amount, 0);
-            document.getElementById('water-total').innerHTML = `${total} / <span id="water-goal-display">${goal}</span> ml`;
+            document.getElementById('water-total').innerHTML = `\( {total} / <span id="water-goal-display"> \){goal}</span> ml`;
             document.getElementById('water-progress').style.width = Math.min((total / goal) * 100, 100) + '%';
             const container = document.getElementById('water-entries');
             container.innerHTML = (data.waterEntries || []).map((entry, i) => `
                 <div class="flex justify-between items-center bg-blue-50 dark:bg-slate-700 px-4 py-3 rounded-2xl">
-                    <div class="flex items-center gap-3"><span class="text-blue-600">💧</span><div><span class="font-medium">${entry.amount} ml</span> <span class="text-xs text-slate-500">${entry.time}</span></div></div>
+                    <div class="flex items-center gap-3"><span class="text-blue-600">💧</span><div><span class="font-medium">\( {entry.amount} ml</span> <span class="text-xs text-slate-500"> \){entry.time}</span></div></div>
                     <button onclick="removeWater(${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
                 </div>`).join('');
         }
@@ -570,7 +562,7 @@
             const container = document.getElementById('favorites-food-bar');
             container.innerHTML = favoriteFoods.map((fav, i) => `
                 <div class="group relative bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:border-red-300 px-4 py-3 rounded-2xl text-sm whitespace-nowrap flex items-center gap-2 flex-shrink-0">
-                    <button onclick="quickAddFavoriteFood(${i})" class="flex-1 text-left">❤️ ${fav.name} <span class="text-emerald-600">(${fav.cal})</span></button>
+                    <button onclick="quickAddFavoriteFood(${i})" class="flex-1 text-left">❤️ \( {fav.name} <span class="text-emerald-600">( \){fav.cal})</span></button>
                     <button onclick="removeFavoriteFood(${i}); event.stopImmediatePropagation();" class="opacity-0 group-hover:opacity-100 text-red-400 hover:text-red-600 p-1"><i class="fa-solid fa-trash"></i></button>
                 </div>`).join('') || '<p class="text-slate-400 dark:text-slate-500 text-sm">No favorite foods yet</p>';
         }
@@ -609,7 +601,7 @@
             const items = data[meal] || [];
             let html = items.length === 0 ? `<p class="text-slate-400 dark:text-slate-500 text-center py-8">No items yet</p>` : '';
             items.forEach((item, i) => {
-                html += `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 px-4 py-3 rounded-2xl"><div><div class="font-medium dark:text-white">${item.name}</div><div class="text-xs text-slate-400">${item.cal} kcal</div></div><button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button></div>`;
+                html += `<div class="flex justify-between items-center bg-slate-50 dark:bg-slate-700 px-4 py-3 rounded-2xl"><div><div class="font-medium dark:text-white">\( {item.name}</div><div class="text-xs text-slate-400"> \){item.cal} kcal</div></div><button onclick="removeFood('${meal}', ${i})" class="text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button></div>`;
             });
             list.innerHTML = html;
             totalEl.textContent = items.reduce((sum, it) => sum + it.cal, 0) + ' kcal';
@@ -620,7 +612,7 @@
             let html = '';
             data.exercises.forEach((ex, i) => {
                 const cal = Math.round(ex.minutes * (ex.calPerMin || currentProfile.kcalPerMin || 10));
-                html += `<div class="flex justify-between items-center bg-orange-50 dark:bg-orange-900/30 px-4 py-3 rounded-2xl"><div class="dark:text-white">${ex.name} • ${ex.minutes} min</div><div class="flex items-center gap-4"><span class="font-medium dark:text-white">${cal} kcal</span><button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`;
+                html += `<div class="flex justify-between items-center bg-orange-50 dark:bg-orange-900/30 px-4 py-3 rounded-2xl"><div class="dark:text-white">${ex.name} • \( {ex.minutes} min</div><div class="flex items-center gap-4"><span class="font-medium dark:text-white"> \){cal} kcal</span><button onclick="removeExercise(${i})" class="text-red-400"><i class="fa-solid fa-trash"></i></button></div></div>`;
             });
             container.innerHTML = html || `<p class="text-slate-400 dark:text-slate-500 py-4">No exercises logged</p>`;
         }
@@ -792,7 +784,7 @@
                         data[meal].push({name, cal});
                         renderAll();
                         saveCurrentData();
-                        alert(`Added ${name} (${cal} kcal)`);
+                        alert(`Added \( {name} ( \){cal} kcal)`);
                     }
                 } else {
                     alert("Product not found. Please add manually.");
@@ -800,16 +792,6 @@
             } catch(e) {
                 alert("Could not fetch product info.");
             }
-        }
-
-        function renderAll() {
-            updateDateDisplay();
-            renderMeal('breakfast'); renderMeal('lunch'); renderMeal('dinner'); renderMeal('snacks');
-            renderExercises();
-            calculateTotals();
-            renderFavoriteFoods();
-            renderFavoriteExercises();
-            renderWater();
         }
 
         window.onload = () => {
